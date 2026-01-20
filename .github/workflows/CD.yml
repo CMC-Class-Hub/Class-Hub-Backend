@@ -11,7 +11,7 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-2         # AWS 리전(서울)
-  ECR_REPOSITORY: classhub-backend   # ECR 레포지토리 이름
+  ECR_REPOSITORY: classhub-ecr   # ECR 레포지토리 이름
   APP_PORT: "8080"                   # EC2 host 포트
 
 jobs:
