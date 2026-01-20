@@ -1,5 +1,5 @@
 # JDK 17 사용
-FROM openjdk:17
+FROM eclipse-temurin:17-jdk
 
 # 작업 디렉토리 설정
 WORKDIR /app
