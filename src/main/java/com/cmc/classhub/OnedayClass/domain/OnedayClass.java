@@ -71,6 +71,16 @@ public class OnedayClass {
         this.shareCode = generateInitialShareCode();
     }
 
+    public void reserveSession(Long sessionId, String applicantName, String phoneNumber, Long memberId) {
+        Session session = this.sessions.stream()
+                .filter(s -> s.getId().equals(sessionId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당 클래스에 속한 세션이 아닙니다."));
+
+        // 세션 상태 및 인원 검증 후 증가
+        session.join();
+    }
+
     // 모집 시작
     public void openOnedayClass() {
         validateNotDeleted();
