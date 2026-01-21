@@ -3,6 +3,7 @@ package com.cmc.classhub.OnedayClass.service;
 import com.cmc.classhub.OnedayClass.domain.OnedayClass;
 import com.cmc.classhub.OnedayClass.dto.OnedayClassDetailResponse;
 import com.cmc.classhub.OnedayClass.repository.OnedayClassRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,4 +24,10 @@ public class OnedayClassReaderService {
 
         return OnedayClassDetailResponse.from(onedayClass);
     }
+
+    public Optional<OnedayClass> findById(Long onedayClassId) {
+        return onedayClassRepository.findById(onedayClassId);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package com.cmc.classhub.OnedayClass.dto;
 
 import com.cmc.classhub.OnedayClass.domain.OnedayClass;
+import java.util.List;
 
 public record OnedayClassDetailResponse(
         String shareCode,

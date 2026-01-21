@@ -71,7 +71,7 @@ public class OnedayClass {
         this.shareCode = generateInitialShareCode();
     }
 
-    public void reserveSession(Long sessionId, String applicantName, String phoneNumber, Long memberId) {
+    public void reserveSession(Long sessionId) {
         Session session = this.sessions.stream()
                 .filter(s -> s.getId().equals(sessionId))
                 .findFirst()
