@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "oneday_classes")
@@ -38,6 +39,10 @@ public class OnedayClass {
 
     private String policy; // 규정 (취소/노쇼 규정)
 
+    private String shareCode; // URL 슬러그로 사용할 고유 코드
+
+    private boolean isDeleted = false; // 삭제 플래그
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OnedayClassStatus status; // 모집중 / 마감 / 종료 / 삭제
@@ -63,26 +68,25 @@ public class OnedayClass {
         this.policy = policy;
         this.status = OnedayClassStatus.RECRUITING;
         this.createdAt = LocalDateTime.now();
+        this.shareCode = generateInitialShareCode();
     }
 
     // 모집 시작
     public void openOnedayClass() {
-        if (this.status == OnedayClassStatus.DELETED) {
-            throw new IllegalStateException("삭제된 클래스는 공개할 수 없습니다.");
-        }
+        validateNotDeleted();
         this.status = OnedayClassStatus.RECRUITING;
     }
 
     // 모집 마감
     public void closeOnedayClass() {
-        if (this.status != OnedayClassStatus.RECRUITING && this.status != OnedayClassStatus.FULL) {
-            throw new IllegalStateException("모집중인 클래스만 마감할 수 있습니다.");
-        }
+        validateNotDeleted();
+        this.status.validateClosable();
         this.status = OnedayClassStatus.CLOSED;
     }
 
     // 세션 추가
     public void addSession(Session session) {
+        this.status.validateAddable();
         this.sessions.add(session);
     }
 
@@ -94,4 +98,20 @@ public class OnedayClass {
                 .orElseThrow(() -> new IllegalArgumentException("해당 세션이 존재하지 않습니다."));
         target.update(updatedSession);
     }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    private void validateNotDeleted() {
+        if (this.isDeleted) {
+            throw new IllegalStateException("삭제된 클래스입니다.");
+        }
+    }
+
+    private String generateInitialShareCode() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+    }
+
+
 }
