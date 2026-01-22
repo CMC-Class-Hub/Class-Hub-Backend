@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static com.cmc.classhub.OnedayClass.domain.SessionStatus.FULL;
+import static com.cmc.classhub.OnedayClass.domain.SessionStatus.RECRUITING;
+
 @Entity
 @Table(name = "sessions")
 @Getter
@@ -45,7 +48,7 @@ public class Session {
         this.endTime = endTime;
         this.capacity = capacity;
         this.currentNum = 0;
-        this.status = SessionStatus.RECRUITING;
+        this.status = RECRUITING;
     }
 
     // 세션 정보 수정 (null이 아닌 값만 수정)
@@ -55,4 +58,18 @@ public class Session {
         if (session.getEndTime() != null) this.endTime = session.getEndTime();
         if (session.getCapacity() != null) this.capacity = session.getCapacity();
     }
+
+    public void join() {
+        if (this.status != RECRUITING) {
+            throw new IllegalStateException("RECRUITING에서만 참여가 가능합니다.");
+        }
+
+        this.currentNum++;
+
+        // 정원이 다 차면 상태를 FULL로 변경
+        if (this.currentNum.equals(this.capacity)) {
+            this.status = FULL;
+        }
+    }
+
 }

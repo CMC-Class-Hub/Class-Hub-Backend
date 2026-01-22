@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "oneday_classes")
@@ -38,6 +39,8 @@ public class OnedayClass {
 
     private String policy; // 규정 (취소/노쇼 규정)
 
+    private String shareCode;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OnedayClassStatus status; // 모집중 / 마감 / 종료 / 삭제
@@ -63,6 +66,17 @@ public class OnedayClass {
         this.policy = policy;
         this.status = OnedayClassStatus.RECRUITING;
         this.createdAt = LocalDateTime.now();
+        this.shareCode = generateInitialShareCode();
+    }
+
+    public void reserveSession(Long sessionId) {
+        Session session = this.sessions.stream()
+                .filter(s -> s.getId().equals(sessionId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당 클래스에 속한 세션이 아닙니다."));
+
+        // 세션 상태 및 인원 검증 후 증가
+        session.join();
     }
 
     // 모집 시작
@@ -94,4 +108,9 @@ public class OnedayClass {
                 .orElseThrow(() -> new IllegalArgumentException("해당 세션이 존재하지 않습니다."));
         target.update(updatedSession);
     }
+
+    private String generateInitialShareCode() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+    }
+
 }
