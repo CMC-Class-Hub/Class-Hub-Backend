@@ -37,4 +37,10 @@ public class Member {
         this.phone = phone;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateReservationInfo(String name, String phone) {
+        this.name = name;
+        this.phone = phone;
+    }
+
 }
