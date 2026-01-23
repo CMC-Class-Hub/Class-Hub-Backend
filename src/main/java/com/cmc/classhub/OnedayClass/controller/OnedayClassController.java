@@ -33,4 +33,13 @@ public class OnedayClassController {
         return ResponseEntity.status(HttpStatus.CREATED).body(classId);
     }
 
+    @PutMapping("/{classId}")
+    public ResponseEntity<Void> updateClass(
+            @PathVariable Long classId,
+            @RequestBody @Valid OnedayClassCreateRequest request
+    ) {
+        onedayClassService.updateOnedayClass(classId, request);
+        return ResponseEntity.ok().build();
+    }
+
 }

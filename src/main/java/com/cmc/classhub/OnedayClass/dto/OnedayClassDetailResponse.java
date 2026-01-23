@@ -5,14 +5,16 @@ import com.cmc.classhub.OnedayClass.domain.SessionStatus;
 import java.util.List;
 
 public record OnedayClassDetailResponse(
-        Long id, // 프론트엔드 예약 요청 시 필요하므로 추가
+        Long id,
         String shareCode,
         String title,
         String description,
         String location,
+        String locationDescription, // 추가
         Integer price,
-        Integer deposit, // 누락된 보증금 필드 추가
         String material,
+        String parkingInfo, // 추가
+        String guidelines,  // 추가
         String policy,
         List<SessionResponse> sessions
 ) {
@@ -23,12 +25,13 @@ public record OnedayClassDetailResponse(
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getLocation(),
+                entity.getLocationDescription(), // 매핑
                 entity.getPrice(),
-                entity.getDeposit(),
                 entity.getMaterial(),
+                entity.getParkingInfo(), // 매핑
+                entity.getGuidelines(),  // 매핑
                 entity.getPolicy(),
                 entity.getSessions().stream()
-                        // 삭제 상태가 아닌 세션만 필터링 (SessionStatus 활용)
                         .filter(s -> s.getStatus() != SessionStatus.DELETED)
                         .map(SessionResponse::from)
                         .toList()

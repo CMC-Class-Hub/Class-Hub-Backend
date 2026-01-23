@@ -16,14 +16,15 @@ public record OnedayClassCreateRequest(
         @NotBlank(message = "수업 장소는 필수입니다.")
         String location,
 
+        String locationDescription, // 위치 안내 추가
+
         @NotNull(message = "가격은 필수입니다.")
         Integer price,
 
-        @NotNull(message = "보증금은 필수입니다.")
-        Integer deposit,
-
-        String material,
-        String policy,
+        String material,     // 준비물
+        String parkingInfo,  // 주차안내 추가
+        String guidelines,   // 주의사항 추가
+        String policy,       // 취소 규정
 
         @NotNull(message = "최소 하나 이상의 세션이 필요합니다.")
         List<SessionCreateRequest> sessions

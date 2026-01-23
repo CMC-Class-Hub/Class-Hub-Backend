@@ -31,11 +31,15 @@ public class OnedayClass {
 
     private String location; // 수업 장소
 
+    private String locationDescription; // 위치 안내 (상세 길안내)
+
     private Integer price; // 정가
 
-    private Integer deposit; // 보증금
-
     private String material; // 준비물/재료
+
+    private String parkingInfo; // 주차안내
+
+    private String guidelines; // 주의사항
 
     private String policy; // 규정 (취소/노쇼 규정)
 
@@ -54,20 +58,21 @@ public class OnedayClass {
 
     @Builder
     public OnedayClass(Long instructorId, String title, String description,
-                       String location, Integer price, Integer deposit,
-                       String material, String policy) {
+                       String location, String locationDescription, Integer price,
+                       String material, String parkingInfo, String guidelines, String policy, String shareCode) {
         this.instructorId = instructorId;
         this.title = title;
         this.description = description;
         this.location = location;
+        this.locationDescription = locationDescription;
         this.price = price;
-        this.deposit = deposit;
         this.material = material;
+        this.parkingInfo = parkingInfo;
+        this.guidelines = guidelines;
         this.policy = policy;
         this.status = OnedayClassStatus.RECRUITING;
         this.createdAt = LocalDateTime.now();
-        this.shareCode = generateInitialShareCode();
-    }
+        this.shareCode = (shareCode != null && !shareCode.isEmpty()) ? shareCode : generateInitialShareCode();    }
 
     public void reserveSession(Long sessionId) {
         Session session = this.sessions.stream()
@@ -93,6 +98,23 @@ public class OnedayClass {
             throw new IllegalStateException("모집중인 클래스만 마감할 수 있습니다.");
         }
         this.status = OnedayClassStatus.CLOSED;
+    }
+
+    public void update(String title, String description, String location, String locationDescription,
+                       Integer price, String material, String parkingInfo, String guidelines, String policy) {
+        this.title = title;
+        this.description = description;
+        this.location = location;
+        this.locationDescription = locationDescription;
+        this.price = price;
+        this.material = material;
+        this.parkingInfo = parkingInfo;
+        this.guidelines = guidelines;
+        this.policy = policy;
+    }
+
+    public void clearSessions() {
+        this.sessions.clear();
     }
 
     // 세션 추가
