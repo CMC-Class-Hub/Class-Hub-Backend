@@ -15,4 +15,7 @@ public interface OnedayClassRepository extends JpaRepository<OnedayClass, Long> 
     Optional<OnedayClass> findByShareCodeWithSessions(@Param("shareCode") String shareCode);
 
     List<OnedayClass> findAllByInstructorId(Long instructorId);
+
+    @Query("select o from OnedayClass o join o.sessions s where s.id = :sessionId")
+    Optional<OnedayClass> findBySessionsId(Long sessionId);
 }

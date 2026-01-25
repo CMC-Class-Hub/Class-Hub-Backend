@@ -1,5 +1,6 @@
 package com.cmc.classhub.reservation.controller;
 
+import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
 import com.cmc.classhub.reservation.service.ReservationService;
@@ -32,4 +33,27 @@ public class ReservationController {
         List<ReservationResponse> responses = reservationService.getReservationsBySession(sessionId);
         return ResponseEntity.ok(responses);
     }
+
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<ReservationDetailResponse> getReservationDetail(@PathVariable Long reservationId) {
+        ReservationDetailResponse response = reservationService.getReservationDetails(reservationId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ReservationDetailResponse>> searchReservations(
+            @RequestParam String name,
+            @RequestParam String phone
+    ) {
+        List<ReservationDetailResponse> results = reservationService.searchMyReservations(name, phone);
+        return ResponseEntity.ok(results);
+    }
+
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId) {
+        reservationService.cancelReservation(reservationId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
