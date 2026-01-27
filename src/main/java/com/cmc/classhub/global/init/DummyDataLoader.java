@@ -43,6 +43,7 @@ public class DummyDataLoader implements CommandLineRunner {
         OnedayClass woodClass = OnedayClass.builder()
                 .instructorId(instructorId)
                 .title("나만의 우드카빙 도마 만들기")
+                .imageUrl("https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=800&auto=format&fit=crop") // [추가]
                 .shareCode("TEST01")
                 .description("세상에서 하나뿐인 나만의 나무 도마를 직접 깎아보세요. 나무의 결을 느끼며 힐링하는 시간입니다.")
                 .location("서울 강남구 테헤란로 123")
@@ -69,6 +70,7 @@ public class DummyDataLoader implements CommandLineRunner {
         OnedayClass potteryClass = OnedayClass.builder()
                 .instructorId(instructorId)
                 .title("감성 가득 달항아리 만들기")
+                .imageUrl("https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=800&auto=format&fit=crop") // 임시 이미지
                 .shareCode("TEST02")
                 .description("부드러운 흙의 감촉을 느끼며 자신만의 달항아리를 빚어보세요. 초보자도 쉽게 배울 수 있습니다.")
                 .location("서울 성동구 연무장길 45")
@@ -90,6 +92,7 @@ public class DummyDataLoader implements CommandLineRunner {
         OnedayClass bakingClass = OnedayClass.builder()
                 .instructorId(instructorId)
                 .title("바삭바삭 휘낭시에 6종 클래스")
+                .imageUrl("https://images.unsplash.com/photo-1612203985729-70726954388c?q=80&w=800&auto=format&fit=crop")
                 .shareCode("TEST03")
                 .description("겉바속촉의 정석! 6가지 다양한 맛의 휘낭시에를 직접 구워보고 포장까지 완벽하게 배워보세요.")
                 .location("서울 마포구 어울마당로 88")

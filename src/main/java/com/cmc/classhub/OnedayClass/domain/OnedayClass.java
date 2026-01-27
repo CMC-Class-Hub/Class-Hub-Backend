@@ -27,6 +27,8 @@ public class OnedayClass {
     @Column(nullable = false)
     private String title;
 
+    private String imageUrl;
+
     private String description; // 수업 소개
 
     private String location; // 수업 장소
@@ -57,12 +59,13 @@ public class OnedayClass {
     private LocalDateTime createdAt;
 
     @Builder
-    public OnedayClass(Long instructorId, String title, String description,
+    public OnedayClass(Long instructorId, String title, String description, String imageUrl,
                        String location, String locationDescription, Integer price,
                        String material, String parkingInfo, String guidelines, String policy, String shareCode) {
         this.instructorId = instructorId;
         this.title = title;
         this.description = description;
+        this.imageUrl = imageUrl;
         this.location = location;
         this.locationDescription = locationDescription;
         this.price = price;
@@ -100,9 +103,10 @@ public class OnedayClass {
         this.status = OnedayClassStatus.CLOSED;
     }
 
-    public void update(String title, String description, String location, String locationDescription,
+    public void update(String title, String imageUrl, String description, String location, String locationDescription,
                        Integer price, String material, String parkingInfo, String guidelines, String policy) {
         this.title = title;
+        this.imageUrl = imageUrl; // 추가
         this.description = description;
         this.location = location;
         this.locationDescription = locationDescription;

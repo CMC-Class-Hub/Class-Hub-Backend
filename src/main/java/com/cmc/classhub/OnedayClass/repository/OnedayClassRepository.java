@@ -17,5 +17,5 @@ public interface OnedayClassRepository extends JpaRepository<OnedayClass, Long> 
     List<OnedayClass> findAllByInstructorId(Long instructorId);
 
     @Query("select o from OnedayClass o join o.sessions s where s.id = :sessionId")
-    Optional<OnedayClass> findBySessionId(@Param("sessionId") Long sessionId);
+    Optional<OnedayClass> findBySessionsId(Long sessionId);
 }
