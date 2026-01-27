@@ -31,8 +31,10 @@ public class DummyDataLoader implements CommandLineRunner {
         // 1. 강사(Instructor) 생성
         Instructor instructor = Instructor.builder()
                 .businessName("취미 공작소")
+                .email("adfd@gmail.com")
                 .name("김강사")
                 .phoneNumber("010-1234-5678")
+                .passwordHash("sefsfa")
                 .build();
         instructorRepository.save(instructor);
         Long instructorId = instructor.getId();
