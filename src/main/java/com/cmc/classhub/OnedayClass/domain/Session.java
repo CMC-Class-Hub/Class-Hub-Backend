@@ -60,6 +60,11 @@ public class Session {
     }
 
     public void join() {
+
+        if (this.currentNum >= this.capacity) {
+            throw new IllegalStateException("정원이 초과되어 예약할 수 없습니다.");
+        }
+
         if (this.status != RECRUITING) {
             throw new IllegalStateException("RECRUITING에서만 참여가 가능합니다.");
         }
@@ -69,6 +74,15 @@ public class Session {
         // 정원이 다 차면 상태를 FULL로 변경
         if (this.currentNum.equals(this.capacity)) {
             this.status = FULL;
+        }
+    }
+
+    public void cancel() {
+        if (this.currentNum > 0) {
+            this.currentNum--;
+            if (this.status == FULL) {
+                this.status = RECRUITING;
+            }
         }
     }
 

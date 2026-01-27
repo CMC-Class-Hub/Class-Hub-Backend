@@ -50,7 +50,7 @@ public class MessageRenderService {
                 .orElseThrow(() -> new RuntimeException("회원 없음: " + reservation.getMemberId()));
 
         // 3) 클래스 + 세션 조회
-        OnedayClass onedayClass = onedayClassRepository.findBySessionId(reservation.getSessionId())
+        OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSessionId())
                 .orElseThrow(() -> new RuntimeException("클래스 없음 (sessionId: " + reservation.getSessionId() + ")"));
 
         Session session = onedayClass.getSessions().stream()

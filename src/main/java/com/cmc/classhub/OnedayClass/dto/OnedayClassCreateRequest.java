@@ -10,6 +10,8 @@ public record OnedayClassCreateRequest(
         @NotBlank(message = "수업 제목은 필수입니다.")
         String title,
 
+        String imageUrl,
+
         @NotBlank(message = "수업 소개는 필수입니다.")
         String description,
 

@@ -26,6 +26,7 @@ public class OnedayClassService {
 
         onedayClass.update(
                 request.title(),
+                request.imageUrl(),
                 request.description(),
                 request.location(),
                 request.locationDescription(),
@@ -54,6 +55,7 @@ public class OnedayClassService {
         OnedayClass onedayClass = OnedayClass.builder()
                 .instructorId(instructorId)
                 .title(request.title())
+                .imageUrl(request.imageUrl())
                 .description(request.description())
                 .location(request.location())
                 .locationDescription(request.locationDescription()) // 추가
