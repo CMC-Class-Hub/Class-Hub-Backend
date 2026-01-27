@@ -15,3 +15,7 @@ spring:
 message:
   sms:
     provider: console
+security:
+  jwt:
+    secret: "dev-secret-dev-secret-dev-secret-dev-secret"
+    access-exp-seconds: 3600

@@ -25,16 +25,24 @@ public class Instructor {
     private String name; // 이름
 
     @Column(nullable = false)
+    private String email; // 이메일
+
+    @Column(nullable = false)
     private String phoneNumber; // 전화번호
+
+    @Column(nullable=false, length=100)
+    private String passwordHash;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public Instructor(String businessName, String name, String phoneNumber) {
+    public Instructor(String businessName, String name, String email, String phoneNumber, String passwordHash) {
         this.businessName = businessName;
         this.name = name;
+        this.email = email;
         this.phoneNumber = phoneNumber;
+        this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
     }
 
