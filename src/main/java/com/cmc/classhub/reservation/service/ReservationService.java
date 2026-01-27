@@ -102,6 +102,7 @@ public class ReservationService {
         return ReservationDetailResponse.builder()
                 .reservationId(reservation.getId())
                 .classTitle(onedayClass.getTitle())
+                .classImageUrl(onedayClass.getImageUrl())
                 .classLocation(onedayClass.getLocation())
                 .date(session.getDate())
                 .startTime(session.getStartTime())

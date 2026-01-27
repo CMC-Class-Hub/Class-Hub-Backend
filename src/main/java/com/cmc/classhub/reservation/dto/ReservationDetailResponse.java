@@ -11,6 +11,7 @@ import java.time.LocalTime;
 public class ReservationDetailResponse {
     private Long reservationId;
     private String classTitle;
+    private String classImageUrl;
     private String classLocation;
     private LocalDate date;
     private LocalTime startTime;
