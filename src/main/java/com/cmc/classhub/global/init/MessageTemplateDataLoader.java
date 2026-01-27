@@ -1,7 +1,7 @@
 package com.cmc.classhub.global.init;
 
-import com.cmc.classhub.message.domain.SystemMessageTemplate;
-import com.cmc.classhub.message.domain.MessageType;
+import com.cmc.classhub.message.domain.MessageTemplate;
+import com.cmc.classhub.message.domain.MessageTemplateType;
 import com.cmc.classhub.message.repository.MessageTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class MessageTemplateDataLoader implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception  {
         initTemplate(
-                MessageType.APPLY_CONFIRMED,
+                MessageTemplateType.APPLY_CONFIRMED,
                 "신청 완료 안내",
                 """
                 [Class Hub] 신청 완료 안내
@@ -39,7 +39,7 @@ public class MessageTemplateDataLoader implements CommandLineRunner {
         );
 
         initTemplate(
-                MessageType.REMINDER_D3,
+                MessageTemplateType.REMINDER_D3,
                 "수업 3일 전 리마인더",
                 """
                 [Class Hub] 수업 3일 전 안내
@@ -56,7 +56,7 @@ public class MessageTemplateDataLoader implements CommandLineRunner {
         );
 
         initTemplate(
-                MessageType.REMINDER_D1,
+                MessageTemplateType.REMINDER_D1,
                 "수업 1일 전 리마인더",
                 """
                 [Class Hub] 수업 하루 전 안내
@@ -77,9 +77,9 @@ public class MessageTemplateDataLoader implements CommandLineRunner {
         log.info("메시지 템플릿 초기화 완료");
     }
 
-    private void initTemplate(MessageType type, String title, String body) {
+    private void initTemplate(MessageTemplateType type, String title, String body) {
         if (templateRepository.findByType(type).isEmpty()) {
-            SystemMessageTemplate template = SystemMessageTemplate.create(type, title, body);
+            MessageTemplate template = MessageTemplate.create(type, title, body);
             templateRepository.save(template);
             log.info("템플릿 생성: {}", type);
         }
