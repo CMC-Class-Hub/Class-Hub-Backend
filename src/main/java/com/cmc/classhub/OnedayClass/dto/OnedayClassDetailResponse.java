@@ -8,6 +8,7 @@ public record OnedayClassDetailResponse(
         Long id,
         String shareCode,
         String title,
+        String imageUrl,
         String description,
         String location,
         String locationDescription, // 추가
@@ -23,6 +24,7 @@ public record OnedayClassDetailResponse(
                 entity.getId(),
                 entity.getShareCode(),
                 entity.getTitle(),
+                entity.getImageUrl(),
                 entity.getDescription(),
                 entity.getLocation(),
                 entity.getLocationDescription(), // 매핑
