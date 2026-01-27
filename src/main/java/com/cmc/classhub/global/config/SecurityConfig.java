@@ -1,4 +1,4 @@
-package com.cmc.classhub.common.config;
+package com.cmc.classhub.global.config;
 
 
 import org.springframework.context.annotation.Bean;

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/classes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000") // Next.js 허용
 public class OnedayClassController {
 
     private final OnedayClassService onedayClassService;
