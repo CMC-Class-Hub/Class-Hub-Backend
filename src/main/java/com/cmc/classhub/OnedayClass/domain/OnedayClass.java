@@ -45,7 +45,7 @@ public class OnedayClass {
 
     private String policy; // 규정 (취소/노쇼 규정)
 
-    private String shareCode;
+    private String classCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -60,8 +60,8 @@ public class OnedayClass {
 
     @Builder
     public OnedayClass(Long instructorId, String title, String description, String imageUrl,
-                       String location, String locationDescription, Integer price,
-                       String material, String parkingInfo, String guidelines, String policy, String shareCode) {
+            String location, String locationDescription, Integer price,
+            String material, String parkingInfo, String guidelines, String policy, String classCode) {
         this.instructorId = instructorId;
         this.title = title;
         this.description = description;
@@ -75,7 +75,8 @@ public class OnedayClass {
         this.policy = policy;
         this.status = OnedayClassStatus.RECRUITING;
         this.createdAt = LocalDateTime.now();
-        this.shareCode = (shareCode != null && !shareCode.isEmpty()) ? shareCode : generateInitialShareCode();    }
+        this.classCode = (classCode != null && !classCode.isEmpty()) ? classCode : generateInitialClassCode();
+    }
 
     public void reserveSession(Long sessionId) {
         Session session = this.sessions.stream()
@@ -104,7 +105,7 @@ public class OnedayClass {
     }
 
     public void update(String title, String imageUrl, String description, String location, String locationDescription,
-                       Integer price, String material, String parkingInfo, String guidelines, String policy) {
+            Integer price, String material, String parkingInfo, String guidelines, String policy) {
         this.title = title;
         this.imageUrl = imageUrl; // 추가
         this.description = description;
@@ -135,7 +136,7 @@ public class OnedayClass {
         target.update(updatedSession);
     }
 
-    private String generateInitialShareCode() {
+    private String generateInitialClassCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
 

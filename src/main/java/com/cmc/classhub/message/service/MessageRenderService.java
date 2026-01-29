@@ -72,7 +72,7 @@ public class MessageRenderService {
                 variables.put(MessageTemplateVariable.PARKING,
                                 onedayClass.getParkingInfo() != null ? onedayClass.getParkingInfo() : "");
                 variables.put(MessageTemplateVariable.CLASS_LINK,
-                                "https://classhub-link.vercel.app/class/" + onedayClass.getShareCode());
+                                "https://classhub-link.vercel.app/class/" + onedayClass.getClassCode());
 
                 return new MessagePayload(
                                 member.getPhone(),

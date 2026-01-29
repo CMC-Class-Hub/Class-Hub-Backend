@@ -16,15 +16,15 @@ public class OnedayClassController {
 
     private final OnedayClassService onedayClassService;
 
-    @GetMapping("/shared/{shareCode}")
-    public ResponseEntity<OnedayClassDetailResponse> getSharedClass(@PathVariable String shareCode) {
-        return ResponseEntity.ok(onedayClassService.getSharedClassDetail(shareCode));
+    @GetMapping("/shared/{classCode}")
+    public ResponseEntity<OnedayClassDetailResponse> getSharedClass(@PathVariable String classCode) {
+        return ResponseEntity.ok(onedayClassService.getSharedClassDetail(classCode));
     }
 
     @PostMapping("/instructor")
     public ResponseEntity<Long> createClass(
             @RequestBody @Valid OnedayClassCreateRequest request
-            // @AuthenticationPrincipal 등을 통해 강사 정보를 가져와야 함
+    // @AuthenticationPrincipal 등을 통해 강사 정보를 가져와야 함
     ) {
         // 테스트를 위해 임시 강사 ID 1L 사용
         Long instructorId = 1L;
@@ -35,8 +35,7 @@ public class OnedayClassController {
     @PutMapping("/{classId}")
     public ResponseEntity<Void> updateClass(
             @PathVariable Long classId,
-            @RequestBody @Valid OnedayClassCreateRequest request
-    ) {
+            @RequestBody @Valid OnedayClassCreateRequest request) {
         onedayClassService.updateOnedayClass(classId, request);
         return ResponseEntity.ok().build();
     }

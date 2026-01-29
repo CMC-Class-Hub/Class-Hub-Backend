@@ -34,8 +34,7 @@ public class OnedayClassService {
                 request.material(),
                 request.parkingInfo(),
                 request.guidelines(),
-                request.policy()
-        );
+                request.policy());
 
         onedayClass.clearSessions();
 
@@ -62,7 +61,7 @@ public class OnedayClassService {
                 .price(request.price())
                 .material(request.material())
                 .parkingInfo(request.parkingInfo()) // 추가
-                .guidelines(request.guidelines())   // 추가
+                .guidelines(request.guidelines()) // 추가
                 .policy(request.policy())
                 .build();
 
@@ -79,8 +78,8 @@ public class OnedayClassService {
         return onedayClassRepository.save(onedayClass).getId();
     }
 
-    public OnedayClassDetailResponse getSharedClassDetail(String shareCode) {
-        OnedayClass onedayClass = onedayClassRepository.findByShareCodeWithSessions(shareCode)
+    public OnedayClassDetailResponse getSharedClassDetail(String classCode) {
+        OnedayClass onedayClass = onedayClassRepository.findByClassCodeWithSessions(classCode)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 클래스 링크입니다."));
 
         return OnedayClassDetailResponse.from(onedayClass);

@@ -9,10 +9,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface OnedayClassRepository extends JpaRepository<OnedayClass, Long> {
-    Optional<OnedayClass> findByShareCode(String shareCode);
+    Optional<OnedayClass> findByClassCode(String classCode);
 
-    @Query("select o from OnedayClass o left join fetch o.sessions where o.shareCode = :shareCode")
-    Optional<OnedayClass> findByShareCodeWithSessions(@Param("shareCode") String shareCode);
+    @Query("select o from OnedayClass o left join fetch o.sessions where o.classCode = :classCode")
+    Optional<OnedayClass> findByClassCodeWithSessions(@Param("classCode") String classCode);
 
     List<OnedayClass> findAllByInstructorId(Long instructorId);
 
