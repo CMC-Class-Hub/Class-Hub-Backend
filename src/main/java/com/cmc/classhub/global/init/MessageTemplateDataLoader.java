@@ -33,7 +33,10 @@ public class MessageTemplateDataLoader implements CommandLineRunner {
 
                 ▶ 일시: {날짜} {시간}
                 ▶ 장소: {장소}
-
+                
+                자세한 내용은 아래 링크를 이용해주세요.
+                {클래스 링크}
+                
                 감사합니다.
                 """
         );
@@ -50,6 +53,9 @@ public class MessageTemplateDataLoader implements CommandLineRunner {
                 ▶ 수업명: {클래스명}
                 ▶ 일시: {날짜} {시간}
                 ▶ 장소: {장소}
+                
+                자세한 내용은 아래 링크를 이용해주세요.
+                {클래스 링크}
 
                 감사합니다.
                 """
@@ -69,6 +75,9 @@ public class MessageTemplateDataLoader implements CommandLineRunner {
                 ▶ 장소: {장소}
                 ▶ 준비물: {준비물}
                 ▶ 주차: {주차}
+                
+                자세한 내용은 아래 링크를 이용해주세요.
+                {클래스 링크}
 
                 감사합니다.
                 """
