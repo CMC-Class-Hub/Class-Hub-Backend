@@ -24,7 +24,8 @@ public enum MessageTemplateVariable {
     TIME("시간"),
     LOCATION("장소"),
     MATERIALS("준비물"),
-    PARKING("주차");
+    PARKING("주차"),
+    CLASS_LINK("클래스링크");
 
     private final String key;
 
@@ -35,10 +36,12 @@ public enum MessageTemplateVariable {
 
     /**
      * 템플릿 본문에서 사용된 변수 중 허용되지 않은 변수 목록 반환
+     * 
      * @return 허용되지 않은 변수 목록 (비어있으면 모두 유효)
      */
     public static List<String> findInvalidVariables(String templateBody) {
-        if (templateBody == null) return List.of();
+        if (templateBody == null)
+            return List.of();
 
         Matcher matcher = TOKEN_PATTERN.matcher(templateBody);
         return matcher.results()
@@ -50,6 +53,7 @@ public enum MessageTemplateVariable {
 
     /**
      * 템플릿 본문의 모든 변수가 유효한지 검증
+     * 
      * @throws IllegalArgumentException 허용되지 않은 변수가 있으면 예외
      */
     public static void validateTemplate(String templateBody) {
@@ -57,8 +61,7 @@ public enum MessageTemplateVariable {
         if (!invalidVars.isEmpty()) {
             throw new IllegalArgumentException(
                     "허용되지 않은 템플릿 변수: " + invalidVars +
-                    ". 사용 가능한 변수: " + VALID_KEYS
-            );
+                            ". 사용 가능한 변수: " + VALID_KEYS);
         }
     }
 }
