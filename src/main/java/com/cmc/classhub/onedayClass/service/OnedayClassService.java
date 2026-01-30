@@ -1,11 +1,10 @@
-package com.cmc.classhub.OnedayClass.service;
+package com.cmc.classhub.onedayClass.service;
 
-import com.cmc.classhub.OnedayClass.domain.OnedayClass;
-import com.cmc.classhub.OnedayClass.domain.Session;
-import com.cmc.classhub.OnedayClass.domain.SessionStatus;
-import com.cmc.classhub.OnedayClass.dto.OnedayClassCreateRequest;
-import com.cmc.classhub.OnedayClass.dto.OnedayClassDetailResponse;
-import com.cmc.classhub.OnedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.onedayClass.domain.OnedayClass;
+import com.cmc.classhub.onedayClass.domain.Session;
+import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
+import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
+import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

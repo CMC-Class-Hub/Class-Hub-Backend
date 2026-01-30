@@ -1,6 +1,6 @@
-package com.cmc.classhub.OnedayClass.dto;
+package com.cmc.classhub.onedayClass.dto;
 
-import com.cmc.classhub.OnedayClass.domain.Session;
+import com.cmc.classhub.onedayClass.domain.Session;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

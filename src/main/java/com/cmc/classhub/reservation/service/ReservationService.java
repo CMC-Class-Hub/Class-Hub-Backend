@@ -1,9 +1,9 @@
 package com.cmc.classhub.reservation.service;
 
-import com.cmc.classhub.OnedayClass.domain.OnedayClass;
-import com.cmc.classhub.OnedayClass.domain.Session;
-import com.cmc.classhub.OnedayClass.repository.OnedayClassRepository;
-import com.cmc.classhub.OnedayClass.service.OnedayClassService;
+import com.cmc.classhub.onedayClass.domain.OnedayClass;
+import com.cmc.classhub.onedayClass.domain.Session;
+import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.onedayClass.service.OnedayClassService;
 import com.cmc.classhub.member.domain.Member;
 import com.cmc.classhub.member.repository.MemberRepository;
 import com.cmc.classhub.reservation.domain.Reservation;

@@ -1,4 +1,4 @@
-package com.cmc.classhub.OnedayClass.domain;
+package com.cmc.classhub.onedayClass.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

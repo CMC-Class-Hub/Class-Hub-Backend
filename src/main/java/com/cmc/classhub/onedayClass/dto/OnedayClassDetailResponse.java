@@ -1,7 +1,7 @@
-package com.cmc.classhub.OnedayClass.dto;
+package com.cmc.classhub.onedayClass.dto;
 
-import com.cmc.classhub.OnedayClass.domain.OnedayClass;
-import com.cmc.classhub.OnedayClass.domain.SessionStatus;
+import com.cmc.classhub.onedayClass.domain.OnedayClass;
+import com.cmc.classhub.onedayClass.domain.SessionStatus;
 import java.util.List;
 
 public record OnedayClassDetailResponse(Long id,String classCode,String title,String imageUrl,String description,String location,String locationDescription, // 추가

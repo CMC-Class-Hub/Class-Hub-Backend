@@ -1,8 +1,7 @@
 package com.cmc.classhub.instructor.repository;
 
-import com.cmc.classhub.OnedayClass.domain.OnedayClass;
 import com.cmc.classhub.instructor.domain.Instructor;
-import java.util.List;
+
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

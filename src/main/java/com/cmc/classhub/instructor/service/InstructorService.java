@@ -1,7 +1,7 @@
 package com.cmc.classhub.instructor.service;
 
-import com.cmc.classhub.OnedayClass.dto.OnedayClassDetailResponse;
-import com.cmc.classhub.OnedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
+import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.instructor.domain.Instructor;
 import com.cmc.classhub.instructor.dto.InstructorLoginRequest;
 import com.cmc.classhub.instructor.repository.InstructorRepository;

@@ -1,13 +1,12 @@
 package com.cmc.classhub.global.init;
 
-import com.cmc.classhub.OnedayClass.domain.OnedayClass;
-import com.cmc.classhub.OnedayClass.domain.Session;
-import com.cmc.classhub.OnedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.onedayClass.domain.OnedayClass;
+import com.cmc.classhub.onedayClass.domain.Session;
+import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.instructor.domain.Instructor;
 import com.cmc.classhub.instructor.repository.InstructorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;

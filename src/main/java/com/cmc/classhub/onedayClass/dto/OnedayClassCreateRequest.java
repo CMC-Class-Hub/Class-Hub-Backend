@@ -1,4 +1,4 @@
-package com.cmc.classhub.OnedayClass.dto;
+package com.cmc.classhub.onedayClass.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

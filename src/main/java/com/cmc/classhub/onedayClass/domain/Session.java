@@ -1,4 +1,4 @@
-package com.cmc.classhub.OnedayClass.domain;
+package com.cmc.classhub.onedayClass.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static com.cmc.classhub.OnedayClass.domain.SessionStatus.FULL;
-import static com.cmc.classhub.OnedayClass.domain.SessionStatus.RECRUITING;
+import static com.cmc.classhub.onedayClass.domain.SessionStatus.FULL;
+import static com.cmc.classhub.onedayClass.domain.SessionStatus.RECRUITING;
 
 @Entity
 @Table(name = "sessions")

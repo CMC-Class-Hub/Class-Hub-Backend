@@ -1,8 +1,8 @@
-package com.cmc.classhub.OnedayClass.controller;
+package com.cmc.classhub.onedayClass.controller;
 
-import com.cmc.classhub.OnedayClass.dto.OnedayClassCreateRequest;
-import com.cmc.classhub.OnedayClass.dto.OnedayClassDetailResponse;
-import com.cmc.classhub.OnedayClass.service.OnedayClassService;
+import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
+import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
+import com.cmc.classhub.onedayClass.service.OnedayClassService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
