@@ -22,7 +22,7 @@ public class Member {
     private String name;
 
     @Column(nullable = false)
-    private String email;
+    private String password;
 
     @Column(nullable = false)
     private String phone;
@@ -33,7 +33,7 @@ public class Member {
     @Builder
     public Member(String loginId, String password, String name, String email, String phone) {
         this.name = name;
-        this.email = email;
+        this.password = password;
         this.phone = phone;
         this.createdAt = LocalDateTime.now();
     }
