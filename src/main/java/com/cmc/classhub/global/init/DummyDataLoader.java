@@ -1,4 +1,4 @@
-package com.cmc.classhub.global.init;
+/*package com.cmc.classhub.global.init;
 
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
@@ -138,3 +138,4 @@ public class DummyDataLoader implements CommandLineRunner {
                 onedayClassRepository.save(yogaClass);
         }
 }
+        */
