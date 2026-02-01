@@ -4,11 +4,12 @@ import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
+import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,73 +19,105 @@ public class OnedayClassService {
 
     private final OnedayClassRepository onedayClassRepository;
 
-    @org.springframework.transaction.annotation.Transactional
-    public void updateOnedayClass(Long classId, OnedayClassCreateRequest request) {
-        OnedayClass onedayClass = onedayClassRepository.findById(classId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
-
-        onedayClass.update(
-                request.title(),
-                request.imageUrl(),
-                request.description(),
-                request.location(),
-                request.locationDescription(),
-                request.price(),
-                request.material(),
-                request.parkingInfo(),
-                request.guidelines(),
-                request.policy());
-
-        onedayClass.clearSessions();
-
-        for (OnedayClassCreateRequest.SessionCreateRequest sessionReq : request.sessions()) {
-            Session session = Session.builder()
-                    .date(sessionReq.date())
-                    .startTime(sessionReq.startTime())
-                    .endTime(sessionReq.endTime())
-                    .capacity(sessionReq.capacity())
-                    .build();
-            onedayClass.addSession(session);
-        }
+    // 1. 강사의 모든 클래스 조회 (삭제되지 않은 것만)
+    public List<OnedayClassResponse> getClassesByInstructor(Long instructorId) {
+        List<OnedayClass> classes = onedayClassRepository
+            .findAllByInstructorId(instructorId);
+        
+        return classes.stream()
+            .filter(onedayClass -> !onedayClass.isDeleted())  // ✅ 삭제되지 않은 것만
+            .map(OnedayClassResponse::from)
+            .toList();
     }
 
+    // 2. 특정 클래스 조회 (삭제되지 않은 것만)
+    public OnedayClassResponse getClassById(Long classId) {
+        OnedayClass onedayClass = onedayClassRepository.findById(classId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
+        
+        // ✅ 삭제된 클래스는 조회 불가
+        if (onedayClass.isDeleted()) {
+            throw new IllegalArgumentException("삭제된 클래스입니다.");
+        }
+        
+        return OnedayClassResponse.from(onedayClass);
+    }
+
+    // 3. 클래스 생성 (세션 없이)
     @Transactional
     public Long createOnedayClass(OnedayClassCreateRequest request, Long instructorId) {
         OnedayClass onedayClass = OnedayClass.builder()
-                .instructorId(instructorId)
-                .title(request.title())
-                .imageUrl(request.imageUrl())
-                .description(request.description())
-                .location(request.location())
-                .locationDescription(request.locationDescription()) // 추가
-                .price(request.price())
-                .material(request.material())
-                .parkingInfo(request.parkingInfo()) // 추가
-                .guidelines(request.guidelines()) // 추가
-                .policy(request.policy())
-                .build();
+            .instructorId(instructorId)
+            .title(request.name())
+            .description(request.description())
+            .location(request.location())
+            .locationDescription(request.locationDetails())
+            .price(request.price())
+            .material(request.preparation())
+            .parkingInfo(request.parkingInfo())
+            .guidelines(request.instructions())
+            .policy(request.cancellationPolicy())
+            .build();
 
-        request.sessions().forEach(s -> {
-            Session session = Session.builder()
-                    .date(s.date())
-                    .startTime(s.startTime())
-                    .endTime(s.endTime())
-                    .capacity(s.capacity())
-                    .build();
-            onedayClass.addSession(session);
-        });
+        // ✅ 이미지 설정
+        onedayClass.updateImages(request.imageUrls());
 
         return onedayClassRepository.save(onedayClass).getId();
     }
 
-    public OnedayClassDetailResponse getSharedClassDetail(String classCode) {
-        OnedayClass onedayClass = onedayClassRepository.findByClassCodeWithSessions(classCode)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 클래스 링크입니다."));
+    // 4. 클래스 수정
+    @Transactional
+    public void updateOnedayClass(Long classId, OnedayClassCreateRequest request) {
+        OnedayClass onedayClass = onedayClassRepository.findById(classId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
 
-        return OnedayClassDetailResponse.from(onedayClass);
+        // ✅ 삭제된 클래스는 수정 불가
+        if (onedayClass.isDeleted()) {
+            throw new IllegalArgumentException("삭제된 클래스는 수정할 수 없습니다.");
+        }
+
+        onedayClass.update(
+            request.name(),
+            request.description(),
+            request.location(),
+            request.locationDetails(),
+            request.price(),
+            request.preparation(),
+            request.parkingInfo(),
+            request.instructions(),
+            request.cancellationPolicy()
+        );
+
+        // ✅ 이미지 별도 처리
+        onedayClass.updateImages(request.imageUrls());
     }
 
-    public Optional<OnedayClass> findById(Long onedayClassId) {
-        return onedayClassRepository.findById(onedayClassId);
+    // 5. 클래스 삭제 (Soft Delete)
+    @Transactional
+    public void deleteClass(Long classId) {
+        OnedayClass onedayClass = onedayClassRepository.findById(classId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
+        
+        // ✅ Soft Delete: isDeleted를 true로 설정
+        onedayClass.delete();
+        
+        // ✅ 연관된 세션도 모두 Soft Delete
+        onedayClass.getSessions().forEach(Session::delete);
+        
+        // DB에서 실제로 삭제하지 않고 isDeleted만 변경
+        // onedayClassRepository.delete(onedayClass); ← 이건 하드 삭제이므로 사용 안 함
+    }
+    
+    // 6. 클래스 복원 (선택사항)
+    @Transactional
+    public void restoreClass(Long classId) {
+        OnedayClass onedayClass = onedayClassRepository.findById(classId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
+        
+        // ✅ 삭제된 클래스 복원
+        onedayClass.restore();
+        
+        // ✅ 연관된 세션도 모두 복원
+        onedayClass.getSessions().forEach(Session::restore);
     }
 }
