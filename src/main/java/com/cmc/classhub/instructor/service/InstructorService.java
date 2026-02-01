@@ -20,11 +20,10 @@ public class InstructorService {
 
     @Transactional
     public Long loginOrRegister(InstructorLoginRequest request) {
-        return instructorRepository.findByBusinessNameAndNameAndPhoneNumber(
-                        request.businessName(), request.name(), request.phoneNumber())
+        return instructorRepository.findByNameAndPhoneNumber(
+                        request.name(), request.phoneNumber())
                 .orElseGet(() -> instructorRepository.save(
                         Instructor.builder()
-                                .businessName(request.businessName())
                                 .name(request.name())
                                 .phoneNumber(request.phoneNumber())
                                 .build()
