@@ -27,8 +27,6 @@ public class OnedayClass {
     @Column(nullable = false)
     private String title;
 
-    private String imageUrl;
-
     private String description; // 수업 소개
 
     private String location; // 수업 장소
@@ -58,15 +56,33 @@ public class OnedayClass {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;//삭제 여부
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "oneday_class_id")
+    private List<CLASS_IMAGE> images = new ArrayList<>();
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void restore() {
+        this.isDeleted = false;
+    }
+
+    public boolean isDeleted() {
+        return this.isDeleted;
+    }
+
     @Builder
-    public OnedayClass(Long instructorId, String title, String description, String imageUrl,
+    public OnedayClass(Long instructorId, String title, String description,
             String location, String locationDescription, Integer price,
             String material, String parkingInfo, String guidelines, String policy, String classCode) {
         this.instructorId = instructorId;
         this.title = title;
         this.description = description;
-        this.imageUrl = imageUrl;
-        this.location = location;
+         this.location = location;
         this.locationDescription = locationDescription;
         this.price = price;
         this.material = material;
@@ -76,6 +92,11 @@ public class OnedayClass {
         this.status = OnedayClassStatus.RECRUITING;
         this.createdAt = LocalDateTime.now();
         this.classCode = (classCode != null && !classCode.isEmpty()) ? classCode : generateInitialClassCode();
+    }
+    public void updateImages(List<String> imageUrls) {
+        this.images.clear();
+        if (imageUrls == null) return;
+        imageUrls.forEach(url -> this.images.add(CLASS_IMAGE.of(url)));
     }
 
     public void reserveSession(Long sessionId) {
@@ -104,10 +125,9 @@ public class OnedayClass {
         this.status = OnedayClassStatus.CLOSED;
     }
 
-    public void update(String title, String imageUrl, String description, String location, String locationDescription,
+    public void update(String title, String description, String location, String locationDescription,
             Integer price, String material, String parkingInfo, String guidelines, String policy) {
         this.title = title;
-        this.imageUrl = imageUrl; // 추가
         this.description = description;
         this.location = location;
         this.locationDescription = locationDescription;
@@ -127,14 +147,6 @@ public class OnedayClass {
         this.sessions.add(session);
     }
 
-    // 세션 수정
-    public void updateSession(Long sessionId, Session updatedSession) {
-        Session target = this.sessions.stream()
-                .filter(s -> s.getId().equals(sessionId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당 세션이 존재하지 않습니다."));
-        target.update(updatedSession);
-    }
 
     private String generateInitialClassCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
