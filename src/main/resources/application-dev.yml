@@ -13,7 +13,7 @@ spring:
       ddl-auto: create   # (create, update, none 등 선택 가능)
     show-sql: true       # 콘솔에 SQL 출력
 message:
-  sms:
+  kakao:
     provider: console
 security:
   jwt:
