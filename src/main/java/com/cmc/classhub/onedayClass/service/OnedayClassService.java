@@ -120,4 +120,16 @@ public class OnedayClassService {
         // ✅ 연관된 세션도 모두 복원
         onedayClass.getSessions().forEach(Session::restore);
     }
+
+    // 7. 클래스 코드로 클래스 조회 (삭제되지 않은 것만)
+public OnedayClassResponse getClassByCode(String classCode) {
+    OnedayClass onedayClass = onedayClassRepository.findByClassCode(classCode)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스 코드입니다."));
+
+    if (onedayClass.isDeleted()) {
+        throw new IllegalArgumentException("삭제된 클래스입니다.");
+    }
+
+    return OnedayClassResponse.from(onedayClass);
+}
 }
