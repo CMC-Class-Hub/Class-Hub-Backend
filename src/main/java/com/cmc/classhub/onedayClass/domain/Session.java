@@ -39,24 +39,50 @@ public class Session {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SessionStatus status; // 상태 (오픈 / 마감)
+    private SessionStatus status; // 상태 (오픈 / 마감/ 종료)
 
-    @Builder
-    public Session(LocalDate date, LocalTime startTime, LocalTime endTime, Integer capacity) {
-        this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.capacity = capacity;
-        this.currentNum = 0;
-        this.status = RECRUITING;
+    @Column(nullable = false)
+    private boolean isDeleted = false;//삭제 여부
+    public void delete() {
+        this.isDeleted = true;
     }
 
+    public void restore() {
+        this.isDeleted = false;
+    }
+
+    public boolean isDeleted() {
+        return this.isDeleted;
+    }
+   @Builder
+public Session(
+    OnedayClass onedayClass,
+    LocalDate date,
+    LocalTime startTime,
+    LocalTime endTime,
+    Integer capacity
+) {
+    this.date = date;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.capacity = capacity;
+    this.currentNum = 0;
+    this.status = RECRUITING;
+}
+    public void updateStatus(SessionStatus status) {
+        this.status = status;
+    }
     // 세션 정보 수정 (null이 아닌 값만 수정)
-    public void update(Session session) {
-        if (session.getDate() != null) this.date = session.getDate();
-        if (session.getStartTime() != null) this.startTime = session.getStartTime();
-        if (session.getEndTime() != null) this.endTime = session.getEndTime();
-        if (session.getCapacity() != null) this.capacity = session.getCapacity();
+       public void update(
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            Integer capacity
+    ) {
+        if (date != null) this.date = date;
+        if (startTime != null) this.startTime = startTime;
+        if (endTime != null) this.endTime = endTime;
+        if (capacity != null) this.capacity = capacity;
     }
 
     public void join() {
@@ -83,6 +109,34 @@ public class Session {
             if (this.status == FULL) {
                 this.status = RECRUITING;
             }
+        }
+    }
+
+     public void reserve() {
+        if (this.status == SessionStatus.FULL) {
+            throw new IllegalStateException("이미 마감된 세션입니다.");
+        }
+        if (this.currentNum >= this.capacity) {
+            throw new IllegalStateException("정원이 모두 찼습니다.");
+        }
+        
+        this.currentNum++;
+        
+        if (this.currentNum >= this.capacity) {
+            this.status = SessionStatus.FULL;
+        }
+    }
+    
+    // 예약 취소
+    public void cancelReservation() {
+        if (this.currentNum <= 0) {
+            throw new IllegalStateException("취소할 예약이 없습니다.");
+        }
+        
+        this.currentNum--;
+        
+        if (this.status == SessionStatus.FULL && this.currentNum < this.capacity) {
+            this.status = SessionStatus.RECRUITING;
         }
     }
 

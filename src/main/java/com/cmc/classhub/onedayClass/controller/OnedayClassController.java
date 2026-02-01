@@ -2,42 +2,76 @@ package com.cmc.classhub.onedayClass.controller;
 
 import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
+import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
 import com.cmc.classhub.onedayClass.service.OnedayClassService;
+import com.cmc.classhub.onedayClass.dto.SessionResponse;
+import com.cmc.classhub.onedayClass.service.SessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 
 @RestController
-@RequestMapping("/api/classes")
+@RequestMapping("/api/templates")
 @RequiredArgsConstructor
 public class OnedayClassController {
 
     private final OnedayClassService onedayClassService;
+    private final SessionService sessionService;
 
-    @GetMapping("/shared/{classCode}")
-    public ResponseEntity<OnedayClassDetailResponse> getSharedClass(@PathVariable String classCode) {
-        return ResponseEntity.ok(onedayClassService.getSharedClassDetail(classCode));
+    // 1. 강사의 모든 클래스 조회
+    @GetMapping
+    public List<OnedayClassResponse> getMyClasses(
+             @RequestParam Long instructorId) {
+            System.out.println("Getclassses = " + instructorId);
+            System.out.println("answer = " + onedayClassService.getClassesByInstructor(instructorId));
+        return onedayClassService.getClassesByInstructor(instructorId);
     }
 
-    @PostMapping("/instructor")
-    public ResponseEntity<Long> createClass(
-            @RequestBody @Valid OnedayClassCreateRequest request
-    // @AuthenticationPrincipal 등을 통해 강사 정보를 가져와야 함
-    ) {
-        // 테스트를 위해 임시 강사 ID 1L 사용
-        Long instructorId = 1L;
+    // 2. 특정 클래스 조회
+    @GetMapping("/{classId}")
+    public OnedayClassResponse getClass(@PathVariable Long classId) {
+        return onedayClassService.getClassById(classId);
+    }
+
+    // 3. 클래스 생성 (세션 없이)
+    @PostMapping
+    public OnedayClassResponse createClass(
+            @RequestParam Long instructorId,
+            @RequestBody @Valid OnedayClassCreateRequest request) {
         Long classId = onedayClassService.createOnedayClass(request, instructorId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(classId);
+        return onedayClassService.getClassById(classId);
     }
 
+    // 4. 클래스 수정
     @PutMapping("/{classId}")
-    public ResponseEntity<Void> updateClass(
+    public OnedayClassResponse updateClass(
             @PathVariable Long classId,
             @RequestBody @Valid OnedayClassCreateRequest request) {
         onedayClassService.updateOnedayClass(classId, request);
-        return ResponseEntity.ok().build();
+        return onedayClassService.getClassById(classId);
     }
 
+    // 5. 클래스 삭제
+    @DeleteMapping("/{classId}")
+    public void deleteClass(@PathVariable Long classId) {
+        onedayClassService.deleteClass(classId);
+    }
+     
+    // 6. 클래스의 세션 목록 조회
+    @GetMapping("/{classId}/sessions")
+    public List<SessionResponse> getClassSessions(@PathVariable Long classId) {
+        System.out.println("세션 겟 = " + sessionService.getSessionsByClassId(classId));
+        return sessionService.getSessionsByClassId(classId);
+    }
+    
+     // 7. 클래스 코드로 클래스 조회
+    @GetMapping("/code/{classCode}")
+    public OnedayClassResponse getClassByCode(@PathVariable String classCode) {
+        return onedayClassService.getClassByCode(classCode);
+    }   
 }
