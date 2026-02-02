@@ -1,7 +1,6 @@
 package com.cmc.classhub.message.controller;
 
 import com.cmc.classhub.message.dto.SolapiWebhookRequest;
-import com.cmc.classhub.message.service.MessageService;
 import com.cmc.classhub.message.service.MessageWebhookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
