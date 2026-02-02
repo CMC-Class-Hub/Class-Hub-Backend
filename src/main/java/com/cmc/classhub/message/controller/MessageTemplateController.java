@@ -7,16 +7,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/messages")
-public class MessageController {
+@RequestMapping("/api/messages/templates")
+public class MessageTemplateController {
 
     private final MessageTemplateService messageTemplateService;
 
     // 전체 템플릿 목록 조회
-    @GetMapping("/templates")
+    @GetMapping
     public List<MessageTemplateResponse> getTemplates() {
         return messageTemplateService.getTemplates();
     }
