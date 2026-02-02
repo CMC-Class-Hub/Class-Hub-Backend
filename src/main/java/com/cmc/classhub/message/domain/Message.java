@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
  * 발송된 메시지 이력 (독립 테이블)
@@ -95,16 +97,28 @@ public class Message {
         return message;
     }
 
-    // 상태 업데이트 (Webhook 등에서 호출)
-    public void markAsSent() {
+    // 상태 업데이트 (Webhook - Timestamp 사용)
+    public void markAsSent(String dateString) {
         this.status = MessageStatus.SENT;
-        this.completedAt = LocalDateTime.now();
+        if (dateString != null) {
+            try {
+                // ISO 8601 (UTC) -> System Default Zone (KST) 변환
+                // 예: 02:18Z -> 11:18 (KST)
+                this.completedAt = ZonedDateTime.parse(dateString)
+                        .withZoneSameInstant(ZoneId.systemDefault())
+                        .toLocalDateTime();
+            } catch (Exception e) {
+                // 파싱 실패 시 현재 시간으로 대체 (안전장치)
+                this.completedAt = LocalDateTime.now();
+            }
+        } else {
+            this.completedAt = LocalDateTime.now();
+        }
     }
 
     public void markAsFailed(String failReason, String failCode) {
         this.status = MessageStatus.FAILED;
         this.failReason = failReason;
         this.failCode = failCode;
-        this.completedAt = LocalDateTime.now();
     }
 }
