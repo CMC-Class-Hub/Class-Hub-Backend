@@ -37,7 +37,6 @@ public class SecurityConfig {
 
         // Origin 허용
         config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
                 "https://classhub-dashboard.vercel.app",
                 "https://classhub-link.vercel.app"
         ));
