@@ -18,10 +18,3 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-aws:
-  s3:
-    bucket: classhub-images
-    region: ap-northeast-2
-  credentials:
-    access-key: ${AWS_ACCESS_KEY}      
-    secret-key: ${AWS_SECRET_KEY}  
