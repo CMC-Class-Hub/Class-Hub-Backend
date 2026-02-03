@@ -1,4 +1,4 @@
-package com.cmc.classhub.global.aws3.dto;
+package com.cmc.classhub.global.image.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

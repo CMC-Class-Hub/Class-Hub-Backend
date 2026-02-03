@@ -26,7 +26,7 @@ public class AuthService {
         }
 
         String hash = passwordEncoder.encode(req.password());
-        Instructor instructor = new Instructor(null,req.name(), req.email(), req.phoneNumber(), hash);
+        Instructor instructor = new Instructor(req.name(), req.email(), req.phoneNumber(), hash);
         instructorRepository.save(instructor);
         return instructor.getId();
     }

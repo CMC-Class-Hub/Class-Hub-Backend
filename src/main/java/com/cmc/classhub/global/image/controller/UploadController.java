@@ -1,7 +1,7 @@
-package com.cmc.classhub.global.aws3.controller;
+package com.cmc.classhub.global.image.controller;
 
-import com.cmc.classhub.global.aws3.dto.PresignedUrlRequest;
-import com.cmc.classhub.global.aws3.dto.PresignedUrlResponse;
+import com.cmc.classhub.global.image.dto.PresignedUrlRequest;
+import com.cmc.classhub.global.image.dto.PresignedUrlResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +21,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/upload")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")  // ⚠️ 프로덕션에서는 특정 도메인만 허용
 public class UploadController {
 
     private final S3Presigner s3Presigner;
@@ -112,13 +111,5 @@ public class UploadController {
             return "";
         }
         return fileName.substring(fileName.lastIndexOf("."));
-    }
-
-    /**
-     * 헬스 체크 엔드포인트
-     */
-    @GetMapping("/health")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("Upload service is running");
     }
 }
