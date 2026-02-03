@@ -8,41 +8,40 @@ import java.util.List;
 
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 
+import com.cmc.classhub.onedayClass.domain.CLASS_IMAGE;
+
 public record OnedayClassResponse(
-    Long id,
-    String name,
-    String thumbnailImageUrl,
-    String description,
-    String location,
-    String locationDescription,
-    Integer price,
-    String preparation,
-    String parkingInfo,
-    String guidelines,
-    String policy,
-    String classCode,
-    Long instructorId
-) {
+        Long id,
+        String name,
+        List<String> imageUrls,
+        String description,
+        String location,
+        String locationDescription,
+        Integer price,
+        String preparation,
+        String parkingInfo,
+        String guidelines,
+        String policy,
+        String classCode,
+        Long instructorId) {
     public static OnedayClassResponse from(OnedayClass onedayClass) {
-        String thumbnail = onedayClass.getImages().isEmpty()
-            ? null
-            : onedayClass.getImages().get(0).getImageUrl();
+        List<String> imageUrls = onedayClass.getImages().stream()
+                .map(CLASS_IMAGE::getImageUrl)
+                .toList();
 
         return new OnedayClassResponse(
-            onedayClass.getId(),
-            onedayClass.getTitle(),
-            thumbnail,
-            onedayClass.getDescription(),
-            onedayClass.getLocation(),
-            onedayClass.getLocationDescription(),
-            onedayClass.getPrice(),
-            onedayClass.getMaterial(),
-            onedayClass.getParkingInfo(),
-            onedayClass.getGuidelines(),
-            onedayClass.getPolicy(),
-            onedayClass.getClassCode(),
-            onedayClass.getInstructorId()
-        );
+                onedayClass.getId(),
+                onedayClass.getTitle(),
+                imageUrls,
+                onedayClass.getDescription(),
+                onedayClass.getLocation(),
+                onedayClass.getLocationDescription(),
+                onedayClass.getPrice(),
+                onedayClass.getMaterial(),
+                onedayClass.getParkingInfo(),
+                onedayClass.getGuidelines(),
+                onedayClass.getPolicy(),
+                onedayClass.getClassCode(),
+                onedayClass.getInstructorId());
     }
 }
-

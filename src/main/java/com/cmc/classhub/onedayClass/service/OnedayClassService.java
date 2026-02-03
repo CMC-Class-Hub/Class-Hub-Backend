@@ -60,7 +60,7 @@ public class OnedayClassService {
             .build();
 
         // ✅ 이미지 설정
-        onedayClass.updateImages(request.imageUrls());
+        onedayClass.updateImages(request.images());
 
         return onedayClassRepository.save(onedayClass).getId();
     }
@@ -89,7 +89,7 @@ public class OnedayClassService {
         );
 
         // ✅ 이미지 별도 처리
-        onedayClass.updateImages(request.imageUrls());
+        onedayClass.updateImages(request.images());
     }
 
     // 5. 클래스 삭제 (Soft Delete)
@@ -122,14 +122,14 @@ public class OnedayClassService {
     }
 
     // 7. 클래스 코드로 클래스 조회 (삭제되지 않은 것만)
-public OnedayClassResponse getClassByCode(String classCode) {
-    OnedayClass onedayClass = onedayClassRepository.findByClassCode(classCode)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스 코드입니다."));
+    public OnedayClassResponse getClassByCode(String classCode) {
+        OnedayClass onedayClass = onedayClassRepository.findByClassCode(classCode)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스 코드입니다."));
 
-    if (onedayClass.isDeleted()) {
-        throw new IllegalArgumentException("삭제된 클래스입니다.");
+        if (onedayClass.isDeleted()) {
+            throw new IllegalArgumentException("삭제된 클래스입니다.");
+        }
+
+        return OnedayClassResponse.from(onedayClass);
     }
-
-    return OnedayClassResponse.from(onedayClass);
-}
 }

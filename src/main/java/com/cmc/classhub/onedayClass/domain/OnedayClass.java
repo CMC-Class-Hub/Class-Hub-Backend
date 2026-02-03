@@ -57,7 +57,7 @@ public class OnedayClass {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private boolean isDeleted = false;//삭제 여부
+    private boolean isDeleted = false;// 삭제 여부
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "oneday_class_id")
@@ -82,7 +82,7 @@ public class OnedayClass {
         this.instructorId = instructorId;
         this.title = title;
         this.description = description;
-         this.location = location;
+        this.location = location;
         this.locationDescription = locationDescription;
         this.price = price;
         this.material = material;
@@ -93,9 +93,11 @@ public class OnedayClass {
         this.createdAt = LocalDateTime.now();
         this.classCode = (classCode != null && !classCode.isEmpty()) ? classCode : generateInitialClassCode();
     }
+
     public void updateImages(List<String> imageUrls) {
         this.images.clear();
-        if (imageUrls == null) return;
+        if (imageUrls == null)
+            return;
         imageUrls.forEach(url -> this.images.add(CLASS_IMAGE.of(url)));
     }
 
@@ -146,7 +148,6 @@ public class OnedayClass {
     public void addSession(Session session) {
         this.sessions.add(session);
     }
-
 
     private String generateInitialClassCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
