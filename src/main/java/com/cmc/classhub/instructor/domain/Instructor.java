@@ -18,9 +18,6 @@ public class Instructor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-   // @Column(nullable = true)//회원가입할때 입력하지 않음.
-   // private String businessName; // 상호명
-
     @Column(nullable = false)
     private String name; // 이름
 
@@ -37,8 +34,7 @@ public class Instructor {
     private LocalDateTime createdAt;
 
     @Builder
-    public Instructor(String businessName, String name, String email, String phoneNumber, String passwordHash) {
-        //this.businessName = businessName;
+    public Instructor(String name, String email, String phoneNumber, String passwordHash) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
