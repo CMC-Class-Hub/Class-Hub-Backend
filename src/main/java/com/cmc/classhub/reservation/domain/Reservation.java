@@ -1,6 +1,5 @@
 package com.cmc.classhub.reservation.domain;
 
-import com.cmc.classhub.member.domain.Member;
 import com.cmc.classhub.onedayClass.domain.Session;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -43,7 +42,7 @@ public class Reservation {
     private Reservation(Session session, Member member) {
         this.session = session;
         this.member = member;
-        this.status = ReservationStatus.PENDING;
+        this.status = ReservationStatus.CONFIRMED;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -57,29 +56,11 @@ public class Reservation {
 
     // 취소
     public void cancel() {
-        if (this.status == ReservationStatus.CANCELLED || this.status == ReservationStatus.TIMEOUT) {
+        if (this.status == ReservationStatus.CANCELLED) {
             throw new IllegalStateException("이미 취소된 예약입니다.");
-        }
-        if (this.status == ReservationStatus.ATTENDED || this.status == ReservationStatus.NO_SHOW) {
-            throw new IllegalStateException("완료된 예약은 취소할 수 없습니다.");
         }
         this.status = ReservationStatus.CANCELLED;
         this.cancelledAt = LocalDateTime.now();
     }
 
-    // 출석 처리
-    public void markAttended() {
-        if (this.status != ReservationStatus.CONFIRMED) {
-            throw new IllegalStateException("확정된 예약만 출석 처리할 수 있습니다.");
-        }
-        this.status = ReservationStatus.ATTENDED;
-    }
-
-    // 노쇼 처리
-    public void markNoShow() {
-        if (this.status != ReservationStatus.CONFIRMED) {
-            throw new IllegalStateException("확정된 예약만 노쇼 처리할 수 있습니다.");
-        }
-        this.status = ReservationStatus.NO_SHOW;
-    }
 }

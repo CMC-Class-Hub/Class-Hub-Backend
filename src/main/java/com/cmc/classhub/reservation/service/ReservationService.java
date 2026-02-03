@@ -4,12 +4,12 @@ import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.onedayClass.service.OnedayClassService;
-import com.cmc.classhub.member.domain.Member;
-import com.cmc.classhub.member.repository.MemberRepository;
+import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
 import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
+import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +52,7 @@ public class ReservationService {
         }
         
         // 5. 세션 예약 처리 (정원 체크 포함)
-        session.reserve();
+        session.join();
         
         // 6. 예약 생성 (상태: PENDING)
         Reservation reservation = Reservation.apply(session, member);
@@ -161,7 +161,7 @@ public class ReservationService {
     
     // 2. 세션 인원 감소
     Session session = reservation.getSession();
-    session.cancelReservation();
+    session.cancel();
     
     // Note: 예약 엔티티는 삭제하지 않고 이력 관리
 }

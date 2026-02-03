@@ -1,10 +1,11 @@
-package com.cmc.classhub.member.service;
+package com.cmc.classhub.reservation.service;
 
-import com.cmc.classhub.member.domain.Member;
-import com.cmc.classhub.member.dto.CreateMemberRequest;
-import com.cmc.classhub.member.dto.MemberResponseDto;
-import com.cmc.classhub.member.dto.UpdateMemberRequest;
-import com.cmc.classhub.member.repository.MemberRepository;
+import com.cmc.classhub.reservation.domain.Member;
+import com.cmc.classhub.reservation.dto.CreateMemberRequest;
+import com.cmc.classhub.reservation.dto.MemberResponseDto;
+import com.cmc.classhub.reservation.dto.UpdateMemberRequest;
+import com.cmc.classhub.reservation.repository.MemberRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

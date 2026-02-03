@@ -1,4 +1,4 @@
-package com.cmc.classhub.member.domain;
+package com.cmc.classhub.reservation.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package com.cmc.classhub.member.dto;
+package com.cmc.classhub.reservation.dto;
 
 import lombok.Getter;
 

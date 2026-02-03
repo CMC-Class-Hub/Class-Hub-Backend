@@ -1,9 +1,10 @@
-package com.cmc.classhub.member.dto;
+package com.cmc.classhub.reservation.dto;
 
-import com.cmc.classhub.member.domain.Member;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+
+import com.cmc.classhub.reservation.domain.Member;
 
 @Getter
 public class MemberResponseDto {

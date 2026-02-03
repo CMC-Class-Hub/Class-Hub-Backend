@@ -1,12 +1,12 @@
 package com.cmc.classhub.reservation.repository;
 
+import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import com.cmc.classhub.onedayClass.domain.Session;
-import com.cmc.classhub.member.domain.Member;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     
