@@ -25,7 +25,7 @@ public class OnedayClassController {
     // 1. 강사의 모든 클래스 조회
     @GetMapping
     public ResponseEntity<List<OnedayClassResponse>> getMyClasses(
-            @RequestParam Long instructorId) {
+            @AuthenticationPrincipal Long instructorId) {
         System.out.println("Getclassses = " + instructorId);
         System.out.println("answer = " + onedayClassService.getClassesByInstructor(instructorId));
         return ResponseEntity.ok(onedayClassService.getClassesByInstructor(instructorId));
@@ -40,7 +40,7 @@ public class OnedayClassController {
     // 3. 클래스 생성 (세션 없이)
     @PostMapping
     public ResponseEntity<OnedayClassResponse> createClass(
-            @RequestParam Long instructorId,
+            @AuthenticationPrincipal Long instructorId,
             @RequestBody @Valid OnedayClassCreateRequest request) {
         Long classId = onedayClassService.createOnedayClass(request, instructorId);
         return ResponseEntity.ok(onedayClassService.getClassById(classId));
