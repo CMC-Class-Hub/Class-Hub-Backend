@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InstructorRepository extends JpaRepository<Instructor, Long> {
-    Optional<Instructor> findByBusinessNameAndNameAndPhoneNumber(String bName, String name, String pNumber);
+    Optional<Instructor> findByNameAndPhoneNumber(String name, String pNumber);
     boolean existsByEmail(String email);
     Optional<Instructor> findByEmail(String email);
 }

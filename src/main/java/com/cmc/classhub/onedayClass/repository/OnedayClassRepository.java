@@ -18,4 +18,13 @@ public interface OnedayClassRepository extends JpaRepository<OnedayClass, Long> 
 
     @Query("select o from OnedayClass o join o.sessions s where s.id = :sessionId")
     Optional<OnedayClass> findBySessionsId(Long sessionId);
+
+    
+    List<OnedayClass> findByInstructorIdAndIsDeletedFalse(Long instructorId);
+   
+
+    @Query("SELECT oc FROM OnedayClass oc JOIN oc.sessions s " +
+       "WHERE s.id = :sessionId AND oc.isDeleted = false AND s.isDeleted = false")
+    Optional<OnedayClass> findBySessionsIdAndNotDeleted(@Param("sessionId") Long sessionId);
+
 }

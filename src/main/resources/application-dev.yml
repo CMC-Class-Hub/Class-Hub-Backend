@@ -19,3 +19,6 @@ security:
   jwt:
     secret: "dev-secret-dev-secret-dev-secret-dev-secret"
     access-exp-seconds: 3600
+
+image:
+  provider: console
