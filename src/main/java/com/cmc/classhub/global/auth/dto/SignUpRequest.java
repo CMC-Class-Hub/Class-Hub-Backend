@@ -7,6 +7,5 @@ public record SignUpRequest(
         @NotBlank String name,
         @Email @NotBlank String email,
         @NotBlank String phoneNumber,
-        @NotBlank String password,
-        @NotBlank String passwordConfirm
+        @NotBlank String password
 ) {}

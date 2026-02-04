@@ -19,9 +19,6 @@ public class Instructor {
     private Long id;
 
     @Column(nullable = false)
-    private String businessName; // 상호명
-
-    @Column(nullable = false)
     private String name; // 이름
 
     @Column(nullable = false)
@@ -37,8 +34,7 @@ public class Instructor {
     private LocalDateTime createdAt;
 
     @Builder
-    public Instructor(String businessName, String name, String email, String phoneNumber, String passwordHash) {
-        this.businessName = businessName;
+    public Instructor(String name, String email, String phoneNumber, String passwordHash) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;

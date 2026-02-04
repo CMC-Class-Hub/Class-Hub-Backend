@@ -3,10 +3,10 @@ package com.cmc.classhub.message.service;
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
-import com.cmc.classhub.member.domain.Member;
-import com.cmc.classhub.member.repository.MemberRepository;
 import com.cmc.classhub.message.domain.MessageTemplateVariable;
+import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
+import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +46,8 @@ public class MessageRenderService {
                                 .orElseThrow(() -> new RuntimeException("예약 없음: " + reservationId));
 
                 // 2) 수강생 조회
-                Member member = memberRepository.findById(reservation.getMemberId())
-                                .orElseThrow(() -> new RuntimeException("회원 없음: " + reservation.getMemberId()));
+                Member member = memberRepository.findById(reservation.getMember().getId())
+                                .orElseThrow(() -> new RuntimeException("회원 없음: " + reservation.getMember().getId()));
 
                 // 3) 클래스 + 세션 조회
                 OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSessionId())

@@ -1,9 +1,10 @@
-package com.cmc.classhub.member.repository;
+package com.cmc.classhub.reservation.repository;
 
-import com.cmc.classhub.member.domain.Member;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.cmc.classhub.reservation.domain.Member;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
