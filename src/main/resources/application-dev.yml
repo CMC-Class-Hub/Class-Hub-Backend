@@ -12,3 +12,18 @@ spring:
     hibernate:
       ddl-auto: create   # (create, update, none 등 선택 가능)
     show-sql: true       # 콘솔에 SQL 출력
+
+message:
+  kakao:
+    provider: console
+
+security:
+  jwt:
+    secret: "dev-secret-dev-secret-dev-secret-dev-secret"
+    access-exp-seconds: 3600
+
+image:
+  provider: console
+
+cors:
+  allowed-origins: http://localhost:3000, https://classhub-dashboard.vercel.app, https://classhub-link.vercel.app

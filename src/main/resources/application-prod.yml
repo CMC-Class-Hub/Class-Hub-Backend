@@ -5,5 +5,32 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create # erd 확정전까지 create
     show-sql: true
+
+#message:
+#  kakao:
+#    provider: solapi
+#    solapi:
+#      api-key: ${SOLAPI_API_KEY}
+#      api-secret: ${SOLAPI_API_SECRET}
+#      from: ${SOLAPI_FROM}
+#      pf-id: ${KAKAO_PF_ID}  # 카카오톡 채널 발신프로필 ID
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-exp-seconds: 3600
+
+image:
+  provider: s3
+aws:
+  s3:
+    bucket: classhub-images
+    region: ap-northeast-2
+  credentials:
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+
+cors:
+  allowed-origins: https://classhub-dashboard.vercel.app, https://classhub-link.vercel.app

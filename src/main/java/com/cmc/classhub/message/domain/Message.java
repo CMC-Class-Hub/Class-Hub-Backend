@@ -7,7 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
+/**
+ * 발송된 메시지 이력 (독립 테이블)
+ */
 @Entity
 @Table(name = "messages")
 @Getter
@@ -18,26 +23,102 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long reservationId;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DomainType domainType;
+
+    @Column(nullable = false)
+    private Long rid; // Reference ID (연관관계 없이 참조만)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MessageStatus status; // PENDING, SENT, FAILED
+    private MessageTemplateType templateType;
 
-    private LocalDateTime scheduledAt; // 발송 예정 일시
+    @Column(nullable = false)
+    private String receiver;
 
-    private LocalDateTime sentAt; // 실제 발송 일시
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageStatus status;
 
-    private String providerMessageId; // 외부 문자 발송 서비스 메시지 ID
+    private String providerMessageId; // Solapi Group ID or Message ID
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private String failCode; // 실패 코드
+
+    @Column(columnDefinition = "TEXT")
+    private String failReason; // 실패 사유
+
+    @Column(nullable = false)
+    private LocalDateTime requestedAt; // 요청 일시
+
+    private LocalDateTime completedAt; // 완료(성공/실패) 일시
 
     @Builder
-    public Message(Long reservationId, LocalDateTime scheduledAt) {
-        this.reservationId = reservationId;
-        this.status = MessageStatus.PENDING;
-        this.scheduledAt = scheduledAt;
-        this.createdAt = LocalDateTime.now();
+    private Message(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiver, MessageStatus status, String providerMessageId,
+            String failReason, String failCode) {
+        this.domainType = domainType;
+        this.rid = rid;
+        this.templateType = templateType;
+        this.receiver = receiver;
+        this.status = status;
+        this.providerMessageId = providerMessageId;
+        this.failReason = failReason;
+        this.failCode = failCode;
+        this.requestedAt = LocalDateTime.now();
+    }
+
+    // 발송 요청 (SENDING)
+    public static Message sending(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiver, String providerMessageId) {
+        return Message.builder()
+                .domainType(domainType)
+                .rid(rid)
+                .templateType(templateType)
+                .receiver(receiver)
+                .status(MessageStatus.SENDING)
+                .providerMessageId(providerMessageId)
+                .build();
+    }
+
+    // 발송 실패 (즉시 실패)
+    public static Message fail(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiver, String failReason, String failCode) {
+        Message message = Message.builder()
+                .domainType(domainType)
+                .rid(rid)
+                .templateType(templateType)
+                .receiver(receiver)
+                .status(MessageStatus.FAILED)
+                .failReason(failReason)
+                .failCode(failCode)
+                .build();
+        message.completedAt = LocalDateTime.now(); // 즉시 완료 처리
+        return message;
+    }
+
+    // 상태 업데이트 (Webhook - Timestamp 사용)
+    public void markAsSent(String dateString) {
+        this.status = MessageStatus.SENT;
+        if (dateString != null) {
+            try {
+                // ISO 8601 (UTC) -> System Default Zone (KST) 변환
+                // 예: 02:18Z -> 11:18 (KST)
+                this.completedAt = ZonedDateTime.parse(dateString)
+                        .withZoneSameInstant(ZoneId.systemDefault())
+                        .toLocalDateTime();
+            } catch (Exception e) {
+                // 파싱 실패 시 현재 시간으로 대체 (안전장치)
+                this.completedAt = LocalDateTime.now();
+            }
+        } else {
+            this.completedAt = LocalDateTime.now();
+        }
+    }
+
+    public void markAsFailed(String failReason, String failCode) {
+        this.status = MessageStatus.FAILED;
+        this.failReason = failReason;
+        this.failCode = failCode;
     }
 }

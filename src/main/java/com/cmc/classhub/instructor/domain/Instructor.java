@@ -18,48 +18,28 @@ public class Instructor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String loginId;
+    @Column(nullable = false)
+    private String name; // 이름
 
     @Column(nullable = false)
-    private String password;
+    private String email; // 이메일
 
     @Column(nullable = false)
-    private String name;
+    private String phoneNumber; // 전화번호
 
-    @Column(nullable = false)
-    private String phone;
-
-    @Column(nullable = false)
-    private Boolean isBusiness;
-
-    private Long activeSettlementAccountId; // 현재 활성 정산 계좌 ID
+    @Column(nullable=false, length=100)
+    private String passwordHash;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public Instructor(String loginId, String password, String name, String phone, Boolean isBusiness) {
-        this.loginId = loginId;
-        this.password = password;
+    public Instructor(String name, String email, String phoneNumber, String passwordHash) {
         this.name = name;
-        this.phone = phone;
-        this.isBusiness = isBusiness;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
     }
 
-
-    // 활성 계좌 변경 (활성 계좌는 1개만)
-    public void changeActiveSettlementAccount(SettlementAccount newAccount, SettlementAccount currentActiveAccount) {
-        // 1) 기존 활성 계좌가 있다면 비활성화
-        if (currentActiveAccount != null) {
-            currentActiveAccount.deactivate();
-        }
-
-        // 2) 새 계좌 활성화
-        newAccount.activate();
-
-        // 3) Instructor의 활성 계좌 ID 갱신
-        this.activeSettlementAccountId = newAccount.getId();
-    }
 }
