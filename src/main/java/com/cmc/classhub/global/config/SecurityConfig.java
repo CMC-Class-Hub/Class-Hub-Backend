@@ -34,8 +34,14 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session.sessionCreationPolicy(
                                                 org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/auth/**", "/health").permitAll()
-                                                .requestMatchers("/api/reservations/**", "/api/students/**").permitAll()
+                                                .requestMatchers(
+                                                                "/api/auth/**",
+                                                                "/health",
+                                                                "/h2-console/**",
+                                                                "/api/reservations",
+                                                                "/api/reservations/**",
+                                                                "/api/students/**")
+                                                .permitAll()
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -46,9 +52,9 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
 
-                // Origin 허용
                 config.setAllowedOrigins(List.of(
                                 "http://localhost:3000",
+                                "http://localhost:3001",
                                 "https://classhub-dashboard.vercel.app",
                                 "https://classhub-link.vercel.app"));
 

@@ -1,5 +1,9 @@
 package com.cmc.classhub.reservation.controller;
 
+import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
+import com.cmc.classhub.onedayClass.dto.SessionResponse;
+import com.cmc.classhub.onedayClass.service.OnedayClassService;
+import com.cmc.classhub.onedayClass.service.SessionService;
 import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
@@ -16,13 +20,13 @@ import org.springframework.web.bind.annotation.*;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final OnedayClassService onedayClassService;
+    private final SessionService sessionService;
 
     @PostMapping
     public ResponseEntity<Long> reserve(
             @RequestParam Long onedayClassId,
-            @RequestBody @Valid ReservationRequest request
-            // 실제 환경에서는 인증 객체(Member)를 시큐리티에서 받아와야 합니다.
-    ) {
+            @RequestBody @Valid ReservationRequest request) {
         Long reservationId = reservationService.createReservation(request, onedayClassId);
         return ResponseEntity.ok(reservationId);
     }
@@ -42,9 +46,9 @@ public class ReservationController {
     @GetMapping("/search")
     public ResponseEntity<List<ReservationDetailResponse>> searchReservations(
             @RequestParam String name,
-            @RequestParam String phone
-    ) {
-        List<ReservationDetailResponse> results = reservationService.searchMyReservations(name, phone);
+            @RequestParam String phone,
+            @RequestParam String password) {
+        List<ReservationDetailResponse> results = reservationService.searchMyReservations(name, phone, password);
         return ResponseEntity.ok(results);
     }
 
@@ -54,6 +58,15 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
+    // 클래스 코드로 클래스 조회 (공개용)
+    @GetMapping("/code/{classCode}")
+    public ResponseEntity<OnedayClassResponse> getClassByCode(@PathVariable String classCode) {
+        return ResponseEntity.ok(onedayClassService.getClassByCode(classCode));
+    }
 
+    // 클래스 아이디로 세션 목록 조회 (공개용)
+    @GetMapping("/{classId}/sessions")
+    public ResponseEntity<List<SessionResponse>> getClassSessions(@PathVariable Long classId) {
+        return ResponseEntity.ok(sessionService.getSessionsByClassId(classId));
+    }
 }
- 

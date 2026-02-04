@@ -26,8 +26,6 @@ public class OnedayClassController {
     @GetMapping
     public ResponseEntity<List<OnedayClassResponse>> getMyClasses(
             @AuthenticationPrincipal Long instructorId) {
-        System.out.println("Getclassses = " + instructorId);
-        System.out.println("answer = " + onedayClassService.getClassesByInstructor(instructorId));
         return ResponseEntity.ok(onedayClassService.getClassesByInstructor(instructorId));
     }
 
@@ -65,13 +63,6 @@ public class OnedayClassController {
     // 6. 클래스의 세션 목록 조회
     @GetMapping("/{classId}/sessions")
     public ResponseEntity<List<SessionResponse>> getClassSessions(@PathVariable Long classId) {
-        System.out.println("세션 겟 = " + sessionService.getSessionsByClassId(classId));
         return ResponseEntity.ok(sessionService.getSessionsByClassId(classId));
-    }
-
-    // 7. 클래스 코드로 클래스 조회
-    @GetMapping("/code/{classCode}")
-    public ResponseEntity<OnedayClassResponse> getClassByCode(@PathVariable String classCode) {
-        return ResponseEntity.ok(onedayClassService.getClassByCode(classCode));
     }
 }
