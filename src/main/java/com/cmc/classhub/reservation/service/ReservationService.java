@@ -112,12 +112,13 @@ public class ReservationService {
         }
 
         @Transactional(readOnly = true)
-        public List<ReservationDetailResponse> searchMyReservations(String name, String phone) {
+        public List<ReservationDetailResponse> searchMyReservations(String name, String phone, String password) {
                 // 1. 회원 찾기
                 Member member = memberRepository.findByNameAndPhone(name, phone)
                                 .orElse(null);
 
-                if (member == null) {
+                // 2. 회원 없거나 비밀번호 틀리면 빈 리스트 반환
+                if (member == null || !member.getPassword().equals(password)) {
                         return Collections.emptyList();
                 }
 
@@ -175,6 +176,7 @@ public class ReservationService {
         private Member createGuestMember(ReservationRequest request) {
                 Member guestMember = Member.builder()
                                 .name(request.getApplicantName())
+                                .password(request.getPassword())
                                 .phone(request.getPhoneNumber())
                                 .build();
                 return memberRepository.save(guestMember);
