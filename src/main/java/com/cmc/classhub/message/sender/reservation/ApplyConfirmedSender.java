@@ -1,13 +1,13 @@
 package com.cmc.classhub.message.sender.reservation;
 
-import com.cmc.classhub.member.domain.Member;
-import com.cmc.classhub.member.repository.MemberRepository;
 import com.cmc.classhub.message.client.MessageClient;
 import com.cmc.classhub.message.domain.MessageTemplateType;
 import com.cmc.classhub.message.repository.MessageRepository;
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.reservation.domain.Member;
+import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
 import org.springframework.stereotype.Component;
 

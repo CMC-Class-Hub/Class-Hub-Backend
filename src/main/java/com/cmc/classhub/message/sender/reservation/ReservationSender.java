@@ -1,7 +1,5 @@
 package com.cmc.classhub.message.sender.reservation;
 
-import com.cmc.classhub.member.domain.Member;
-import com.cmc.classhub.member.repository.MemberRepository;
 import com.cmc.classhub.message.client.MessageClient;
 import com.cmc.classhub.message.domain.DomainType;
 import com.cmc.classhub.message.repository.MessageRepository;
@@ -9,15 +7,14 @@ import com.cmc.classhub.message.sender.MessageSender;
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
+import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.cmc.classhub.message.domain.MessageStatus;
@@ -60,9 +57,9 @@ public abstract class ReservationSender extends MessageSender {
                         return;
                 }
 
-                Member member = memberRepository.findById(reservation.getMemberId())
+                Member member = memberRepository.findById(reservation.getMember().getId())
                                 .orElseThrow(() -> new IllegalArgumentException(
-                                                "존재하지 않는 회원입니다. id=" + reservation.getMemberId()));
+                                                "존재하지 않는 회원입니다. id=" + reservation.getMember().getId()));
 
                 OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSessionId())
                                 .orElseThrow(

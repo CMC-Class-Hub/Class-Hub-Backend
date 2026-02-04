@@ -40,7 +40,7 @@ public class SecurityConfig {
                                                                 "/h2-console/**",
                                                                 "/api/reservations",
                                                                 "/api/reservations/**",
-                                                                "/api/students/**")
+                                                                "/api/members/**")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -52,11 +52,11 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
 
-        // Origin 허용
-        config.setAllowedOrigins(List.of(
-                "https://classhub-dashboard.vercel.app",
-                "https://classhub-link.vercel.app"
-        ));
+                // Origin 허용
+                config.setAllowedOrigins(List.of(
+                        "https://classhub-dashboard.vercel.app",
+                        "https://classhub-link.vercel.app"
+                ));
 
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
