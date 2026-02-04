@@ -128,7 +128,8 @@ public class OnedayClass {
     }
 
     public void update(String title, String description, String location, String locationDescription,
-            Integer price, String material, String parkingInfo, String guidelines, String policy) {
+            Integer price, String material, String parkingInfo, String guidelines, String policy,
+            List<String> imageUrls) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -138,6 +139,7 @@ public class OnedayClass {
         this.parkingInfo = parkingInfo;
         this.guidelines = guidelines;
         this.policy = policy;
+        updateImages(imageUrls);
     }
 
     public void clearSessions() {
