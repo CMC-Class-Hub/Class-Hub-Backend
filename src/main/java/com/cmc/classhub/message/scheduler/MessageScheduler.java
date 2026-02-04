@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * 메시지 발송 스케줄러
- * 매일 오전 9시에 D-3, D-1 리마인더 발송
+ * 매일 오전 10시에 D-3, D-1 리마인더 발송
  */
 @Slf4j
 @Component

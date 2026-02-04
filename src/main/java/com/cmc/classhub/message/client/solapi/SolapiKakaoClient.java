@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "message.kakao", name = "provider", havingValue = "kakao")
+@ConditionalOnProperty(prefix = "message.kakao", name = "provider", havingValue = "solapi")
 public class SolapiKakaoClient implements MessageClient {
 
     private final DefaultMessageService messageService;
