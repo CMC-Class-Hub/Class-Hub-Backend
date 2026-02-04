@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "message.kakao.solapi")
-@ConditionalOnProperty(prefix = "message.sms", name = "provider", havingValue = "kakao")
+@ConditionalOnProperty(prefix = "message.kakao", name = "provider", havingValue = "solapi")
 @Getter
 @Setter
 public class SolapiKakaoConfig {
