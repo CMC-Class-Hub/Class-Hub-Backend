@@ -7,9 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 
+import com.cmc.classhub.reservation.domain.ReservationStatus;
+
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsBySessionIdAndMemberId(Long sessionId, Long memberId);
+    List<Reservation> findBySessionIdAndStatus(Long sessionId, ReservationStatus status);
 
     // ID 기반 쿼리
     boolean existsBySessionIdAndMember(Long sessionId, Member member);

@@ -2,24 +2,19 @@ package com.cmc.classhub.message.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
-import static jakarta.persistence.FetchType.LAZY;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
- * "보낼 문자"를 DB에 저장해두는 큐
- * 상태 전이는 반드시 메서드를 통해서만 가능
+ * 발송된 메시지 이력 (독립 테이블)
  */
 @Entity
-@Table(
-        name = "messages",
-        indexes = {
-                @Index(name = "idx_messages_status_scheduled", columnList = "status, scheduledAt")
-        }
-)
+@Table(name = "messages")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Message {
@@ -28,90 +23,102 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long reservationId;
-
     @Enumerated(EnumType.STRING)
-    private MessageTemplateType type;
+    @Column(nullable = false)
+    private DomainType domainType;
 
-    private LocalDateTime scheduledAt;
-
-    @Column(name = "idempotency_key", nullable = false, unique = true, length = 150)
-    private String idempotencyKey;
+    @Column(nullable = false)
+    private Long rid; // Reference ID (연관관계 없이 참조만)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MessageStatus status = MessageStatus.PENDING;
+    private MessageTemplateType templateType;
 
-    private String providerMessageId;
+    @Column(nullable = false)
+    private String receiver;
 
-    private LocalDateTime sentAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageStatus status;
 
-    @Column(name = "retry_count", nullable = false)
-    private int retryCount = 0;
+    private String providerMessageId; // Solapi Group ID or Message ID
 
-    @Column(name = "last_error", columnDefinition = "TEXT")
-    private String lastError;
+    private String failCode; // 실패 코드
 
-    // ===== 생성 메서드 =====
+    @Column(columnDefinition = "TEXT")
+    private String failReason; // 실패 사유
 
-    public static Message create(Long reservationId, MessageTemplateType type, LocalDateTime scheduledAt, String idempotencyKey) {
-        Message msg = new Message();
-        msg.reservationId = reservationId;
-        msg.type = type;
-        msg.scheduledAt = scheduledAt;
-        msg.idempotencyKey = idempotencyKey;
-        msg.status = MessageStatus.PENDING;
-        return msg;
-    }
+    @Column(nullable = false)
+    private LocalDateTime requestedAt; // 요청 일시
 
-    // ===== 상태 전이 메서드 =====
+    private LocalDateTime completedAt; // 완료(성공/실패) 일시
 
-    /**
-     * 발송 성공
-     */
-    public void markAsSent(String providerMessageId) {
-        this.status = MessageStatus.SENT;
-        this.sentAt = LocalDateTime.now();
+    @Builder
+    private Message(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiver, MessageStatus status, String providerMessageId,
+            String failReason, String failCode) {
+        this.domainType = domainType;
+        this.rid = rid;
+        this.templateType = templateType;
+        this.receiver = receiver;
+        this.status = status;
         this.providerMessageId = providerMessageId;
-        this.lastError = null;
+        this.failReason = failReason;
+        this.failCode = failCode;
+        this.requestedAt = LocalDateTime.now();
     }
 
-    /**
-     * 발송 최종 실패 (재시도 소진)
-     */
-    public void markAsFailed(String error) {
+    // 발송 요청 (SENDING)
+    public static Message sending(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiver, String providerMessageId) {
+        return Message.builder()
+                .domainType(domainType)
+                .rid(rid)
+                .templateType(templateType)
+                .receiver(receiver)
+                .status(MessageStatus.SENDING)
+                .providerMessageId(providerMessageId)
+                .build();
+    }
+
+    // 발송 실패 (즉시 실패)
+    public static Message fail(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiver, String failReason, String failCode) {
+        Message message = Message.builder()
+                .domainType(domainType)
+                .rid(rid)
+                .templateType(templateType)
+                .receiver(receiver)
+                .status(MessageStatus.FAILED)
+                .failReason(failReason)
+                .failCode(failCode)
+                .build();
+        message.completedAt = LocalDateTime.now(); // 즉시 완료 처리
+        return message;
+    }
+
+    // 상태 업데이트 (Webhook - Timestamp 사용)
+    public void markAsSent(String dateString) {
+        this.status = MessageStatus.SENT;
+        if (dateString != null) {
+            try {
+                // ISO 8601 (UTC) -> System Default Zone (KST) 변환
+                // 예: 02:18Z -> 11:18 (KST)
+                this.completedAt = ZonedDateTime.parse(dateString)
+                        .withZoneSameInstant(ZoneId.systemDefault())
+                        .toLocalDateTime();
+            } catch (Exception e) {
+                // 파싱 실패 시 현재 시간으로 대체 (안전장치)
+                this.completedAt = LocalDateTime.now();
+            }
+        } else {
+            this.completedAt = LocalDateTime.now();
+        }
+    }
+
+    public void markAsFailed(String failReason, String failCode) {
         this.status = MessageStatus.FAILED;
-        this.retryCount++;
-        this.lastError = error;
-    }
-
-    /**
-     * 재시도 예약
-     */
-    public void scheduleRetry(String error, int maxRetryCount) {
-        this.retryCount++;
-        this.lastError = error;
-
-        if (this.retryCount >= maxRetryCount) {
-            this.status = MessageStatus.FAILED;
-            return;
-        }
-
-        // 재시도 간격: 1m -> 5m -> 30m -> 2h -> 6h
-        int[] minutes = {1, 5, 30, 120, 360};
-        int idx = Math.min(this.retryCount - 1, minutes.length - 1);
-
-        this.scheduledAt = LocalDateTime.now().plusMinutes(minutes[idx]);
-        this.status = MessageStatus.PENDING;
-    }
-
-    /**
-     * 발송 취소
-     */
-    public void cancel() {
-        if (this.status != MessageStatus.PENDING) {
-            throw new IllegalStateException("PENDING 상태의 메시지만 취소할 수 있습니다. 현재: " + this.status);
-        }
-        this.status = MessageStatus.CANCELED;
+        this.failReason = failReason;
+        this.failCode = failCode;
     }
 }

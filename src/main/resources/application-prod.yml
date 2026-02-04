@@ -5,15 +5,16 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create # erd 확정전까지 create
     show-sql: true
-message:
-  sms:
-    provider: solapi
-    solapi:
-      api-key: ${SOLAPI_API_KEY}
-      api-secret: ${SOLAPI_API_SECRET}
-      from: ${SOLAPI_FROM}
+#message:
+#  kakao:
+#    provider: solapi
+#    solapi:
+#      api-key: ${SOLAPI_API_KEY}
+#      api-secret: ${SOLAPI_API_SECRET}
+#      from: ${SOLAPI_FROM}
+#      pf-id: ${KAKAO_PF_ID}  # 카카오톡 채널 발신프로필 ID
 security:
   jwt:
     secret: ${JWT_SECRET}
