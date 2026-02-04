@@ -50,14 +50,14 @@ public class MessageRenderService {
                                 .orElseThrow(() -> new RuntimeException("회원 없음: " + reservation.getMember().getId()));
 
                 // 3) 클래스 + 세션 조회
-                OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSession().getId())
+                OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSessionId())
                                 .orElseThrow(() -> new RuntimeException(
-                                                "클래스 없음 (sessionId: " + reservation.getSession().getId() + ")"));
+                                                "클래스 없음 (sessionId: " + reservation.getSessionId() + ")"));
 
                 Session session = onedayClass.getSessions().stream()
-                                .filter(s -> s.getId().equals(reservation.getSession().getId()))
+                                .filter(s -> s.getId().equals(reservation.getSessionId()))
                                 .findFirst()
-                                .orElseThrow(() -> new RuntimeException("세션 없음: " + reservation.getSession().getId()));
+                                .orElseThrow(() -> new RuntimeException("세션 없음: " + reservation.getSessionId()));
 
                 // 4) 템플릿 변수 Map 생성 (TemplateVariable enum 사용)
                 Map<MessageTemplateVariable, Object> variables = new EnumMap<>(MessageTemplateVariable.class);
