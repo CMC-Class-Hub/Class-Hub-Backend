@@ -10,18 +10,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "message.sms.solapi")
-@ConditionalOnProperty(prefix = "message.sms", name = "provider", havingValue = "solapi")
+@ConfigurationProperties(prefix = "message.kakao.solapi")
+@ConditionalOnProperty(prefix = "message.kakao", name = "provider", havingValue = "solapi")
 @Getter
 @Setter
-public class SolapiConfig {
+public class SolapiKakaoConfig {
 
     private String apiKey;
     private String apiSecret;
     private String from;
+    private String pfId;  // 카카오톡 채널 발신프로필 ID
 
     @Bean
-    public DefaultMessageService solapiMessageService() {
+    public DefaultMessageService solapiKakaoMessageService() {
         return SolapiClient.INSTANCE.createInstance(apiKey, apiSecret);
     }
 }

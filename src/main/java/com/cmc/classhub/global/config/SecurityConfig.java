@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -21,6 +22,9 @@ import java.util.List;
 public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+        @Value("${cors.allowed-origins}")
+        private List<String> allowedOrigins;
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -38,9 +42,10 @@ public class SecurityConfig {
                                                                 "/api/auth/**",
                                                                 "/health",
                                                                 "/h2-console/**",
+                                                                "/api/messages/webhook",
                                                                 "/api/reservations",
                                                                 "/api/reservations/**",
-                                                                "/api/students/**")
+                                                                "/api/members/**")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -52,11 +57,8 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
 
-                config.setAllowedOrigins(List.of(
-                                "http://localhost:3000",
-                                "http://localhost:3001",
-                                "https://classhub-dashboard.vercel.app",
-                                "https://classhub-link.vercel.app"));
+                // Origin 허용 (yml에서 주입)
+                config.setAllowedOrigins(allowedOrigins);
 
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
