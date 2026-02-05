@@ -1,6 +1,7 @@
 package com.cmc.classhub.message.controller;
 
 import com.cmc.classhub.message.domain.MessageTemplateType;
+import com.cmc.classhub.message.dto.MessageTemplateMetadata;
 import com.cmc.classhub.message.dto.MessageTemplateResponse;
 import com.cmc.classhub.message.service.MessageTemplateService;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,9 @@ public class MessageTemplateController {
 
     private final MessageTemplateService messageTemplateService;
 
-    // 전체 템플릿 목록 조회 (타이틀만)
+    // 전체 템플릿 목록 조회 (타이틀, 설명)
     @GetMapping
-    public List<String> getTemplates() {
+    public List<MessageTemplateMetadata> getTemplates() {
         return messageTemplateService.getTemplates();
     }
 
