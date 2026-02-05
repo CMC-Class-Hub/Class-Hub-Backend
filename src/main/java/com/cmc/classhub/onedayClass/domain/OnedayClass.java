@@ -33,8 +33,6 @@ public class OnedayClass {
 
     private String locationDescription; // 위치 안내 (상세 길안내)
 
-    private Integer price; // 정가
-
     private String material; // 준비물/재료
 
     private String parkingInfo; // 주차안내
@@ -77,14 +75,13 @@ public class OnedayClass {
 
     @Builder
     public OnedayClass(Long instructorId, String title, String description,
-            String location, String locationDescription, Integer price,
+            String location, String locationDescription,
             String material, String parkingInfo, String guidelines, String policy, String classCode) {
         this.instructorId = instructorId;
         this.title = title;
         this.description = description;
         this.location = location;
         this.locationDescription = locationDescription;
-        this.price = price;
         this.material = material;
         this.parkingInfo = parkingInfo;
         this.guidelines = guidelines;
@@ -128,13 +125,12 @@ public class OnedayClass {
     }
 
     public void update(String title, String description, String location, String locationDescription,
-            Integer price, String material, String parkingInfo, String guidelines, String policy,
+            String material, String parkingInfo, String guidelines, String policy,
             List<String> imageUrls) {
         this.title = title;
         this.description = description;
         this.location = location;
         this.locationDescription = locationDescription;
-        this.price = price;
         this.material = material;
         this.parkingInfo = parkingInfo;
         this.guidelines = guidelines;

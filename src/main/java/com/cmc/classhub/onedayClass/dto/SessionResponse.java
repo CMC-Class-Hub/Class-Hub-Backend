@@ -12,8 +12,8 @@ public record SessionResponse(
         LocalTime endTime,
         int currentNum,
         int capacity,
-        String status
-) {
+        int price,
+        String status) {
     public static SessionResponse from(Session session) {
         return new SessionResponse(
                 session.getId(),
@@ -22,7 +22,7 @@ public record SessionResponse(
                 session.getEndTime(),
                 session.getCurrentNum(),
                 session.getCapacity(),
-                session.getStatus().name()
-        );
+                session.getPrice(),
+                session.getStatus().name());
     }
 }
