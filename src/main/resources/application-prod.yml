@@ -5,7 +5,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create # erd 확정전까지 create
+      ddl-auto: create-drop # erd 확정전까지 create
     show-sql: true
 
 #message:
