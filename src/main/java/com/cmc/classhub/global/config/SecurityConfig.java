@@ -42,6 +42,7 @@ public class SecurityConfig {
                                                                 "/api/auth/**",
                                                                 "/health",
                                                                 "/h2-console/**",
+                                                                "/api/messages/webhook",
                                                                 "/api/reservations",
                                                                 "/api/reservations/**",
                                                                 "/api/members/**")
