@@ -1,9 +1,5 @@
 package com.cmc.classhub.onedayClass.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
@@ -11,37 +7,35 @@ import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.CLASS_IMAGE;
 
 public record OnedayClassResponse(
-        Long id,
-        String name,
-        List<String> imageUrls,
-        String description,
-        String location,
-        String locationDescription,
-        Integer price,
-        String preparation,
-        String parkingInfo,
-        String guidelines,
-        String policy,
-        String classCode,
-        Long instructorId) {
-    public static OnedayClassResponse from(OnedayClass onedayClass) {
-        List<String> imageUrls = onedayClass.getImages().stream()
-                .map(CLASS_IMAGE::getImageUrl)
-                .toList();
+                Long id,
+                String name,
+                List<String> imageUrls,
+                String description,
+                String location,
+                String locationDescription,
+                String preparation,
+                String parkingInfo,
+                String guidelines,
+                String policy,
+                String classCode,
+                Long instructorId) {
+        public static OnedayClassResponse from(OnedayClass onedayClass) {
+                List<String> imageUrls = onedayClass.getImages().stream()
+                                .map(CLASS_IMAGE::getImageUrl)
+                                .toList();
 
-        return new OnedayClassResponse(
-                onedayClass.getId(),
-                onedayClass.getTitle(),
-                imageUrls,
-                onedayClass.getDescription(),
-                onedayClass.getLocation(),
-                onedayClass.getLocationDescription(),
-                onedayClass.getPrice(),
-                onedayClass.getMaterial(),
-                onedayClass.getParkingInfo(),
-                onedayClass.getGuidelines(),
-                onedayClass.getPolicy(),
-                onedayClass.getClassCode(),
-                onedayClass.getInstructorId());
-    }
+                return new OnedayClassResponse(
+                                onedayClass.getId(),
+                                onedayClass.getTitle(),
+                                imageUrls,
+                                onedayClass.getDescription(),
+                                onedayClass.getLocation(),
+                                onedayClass.getLocationDescription(),
+                                onedayClass.getMaterial(),
+                                onedayClass.getParkingInfo(),
+                                onedayClass.getGuidelines(),
+                                onedayClass.getPolicy(),
+                                onedayClass.getClassCode(),
+                                onedayClass.getInstructorId());
+        }
 }

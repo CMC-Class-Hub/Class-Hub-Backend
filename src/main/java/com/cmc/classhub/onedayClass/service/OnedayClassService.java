@@ -3,14 +3,12 @@ package com.cmc.classhub.onedayClass.service;
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
-import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
 import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +50,6 @@ public class OnedayClassService {
                 .description(request.description())
                 .location(request.location())
                 .locationDescription(request.locationDetails())
-                .price(request.price())
                 .material(request.preparation())
                 .parkingInfo(request.parkingInfo())
                 .guidelines(request.instructions())
@@ -81,7 +78,6 @@ public class OnedayClassService {
                 request.description(),
                 request.location(),
                 request.locationDetails(),
-                request.price(),
                 request.preparation(),
                 request.parkingInfo(),
                 request.instructions(),
