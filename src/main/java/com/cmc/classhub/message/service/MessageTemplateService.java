@@ -42,15 +42,24 @@ public class MessageTemplateService {
         log.info("모든 메시지 템플릿 캐싱 완료 ({}개)", templateCache.size());
     }
 
-    // 모든 템플릿 목록 조회
-    public List<MessageTemplateResponse> getTemplates() {
+    // 모든 템플릿 목록 조회 (타이틀만)
+    public List<String> getTemplates() {
         return Arrays.stream(MessageTemplateType.values())
-                .map(this::getTemplate)
+                .map(MessageTemplateType::getDescription)
                 .collect(Collectors.toList());
     }
 
-    // 특정 템플릿 조회 (캐시 사용)
-    public MessageTemplateResponse getTemplate(MessageTemplateType type) {
+    // 특정 템플릿 조회 (타이틀로 조회)
+    public MessageTemplateResponse getTemplateByTitle(String title) {
+        MessageTemplateType type = Arrays.stream(MessageTemplateType.values())
+                .filter(t -> t.getDescription().equals(title))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 템플릿입니다: " + title));
+        return getTemplate(type);
+    }
+
+    // 특정 템플릿 조회 (내부 사용)
+    private MessageTemplateResponse getTemplate(MessageTemplateType type) {
         String body = templateCache.get(type);
         if (body == null) {
             throw new IllegalStateException("템플릿을 찾을 수 없습니다: " + type);
