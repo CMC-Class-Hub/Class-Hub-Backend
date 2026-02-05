@@ -26,6 +26,7 @@ public class ReservationService {
         private final ReservationRepository reservationRepository;
         private final MemberRepository memberRepository;
         private final OnedayClassRepository onedayClassRepository;
+        private final com.cmc.classhub.message.service.MessageService messageService;
 
         public Long createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
@@ -53,7 +54,18 @@ public class ReservationService {
                 // 6. 예약 생성 (상태: PENDING)
                 Reservation reservation = Reservation.apply(session.getId(), member);
 
-                return reservationRepository.save(reservation).getId();
+                Long reservationId = reservationRepository.save(reservation).getId();
+
+                // 7. 예약 확정 알림톡 발송
+                try {
+                        messageService.send(com.cmc.classhub.message.domain.MessageTemplateType.APPLY_CONFIRMED,
+                                        reservationId);
+                } catch (Exception e) {
+                        // 알림톡 발송 실패가 예약 프로세스를 방해하면 안 됨
+                        e.printStackTrace();
+                }
+
+                return reservationId;
         }
 
         @Transactional(readOnly = true)

@@ -1,6 +1,5 @@
 package com.cmc.classhub.message.dto;
 
-import com.cmc.classhub.message.domain.MessageTemplate;
 import com.cmc.classhub.message.domain.MessageTemplateType;
 
 public record MessageTemplateResponse(
@@ -8,11 +7,7 @@ public record MessageTemplateResponse(
         String title,
         String body
 ) {
-    public static MessageTemplateResponse from(MessageTemplate template) {
-        return new MessageTemplateResponse(
-                template.getType(),
-                template.getTitle(),
-                template.getBody()
-        );
+    public static MessageTemplateResponse of(MessageTemplateType type, String title, String body) {
+        return new MessageTemplateResponse(type, title, body);
     }
 }
