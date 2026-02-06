@@ -19,7 +19,8 @@ public record OnedayClassResponse(
                 String instructions,
                 String cancellationPolicy,
                 String classCode,
-                Long instructorId
+                Long instructorId,
+                String linkShareStatus
         
         ) {
         public static OnedayClassResponse from(OnedayClass onedayClass) {
@@ -39,6 +40,7 @@ public record OnedayClassResponse(
                                 onedayClass.getGuidelines(),
                                 onedayClass.getPolicy(),
                                 onedayClass.getClassCode(),
-                                onedayClass.getInstructorId());
+                                onedayClass.getInstructorId(),
+                                onedayClass.getLinkShareStatus().toString());
         }
 }

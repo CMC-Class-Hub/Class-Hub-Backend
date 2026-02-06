@@ -2,6 +2,7 @@ package com.cmc.classhub.onedayClass.service;
 
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
+import com.cmc.classhub.onedayClass.dto.LinkShareStatusUpdateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
@@ -145,5 +146,20 @@ public class OnedayClassService {
         }
 
         return OnedayClassResponse.from(onedayClass);
+    }
+
+    @Transactional
+    public void updateLinkShareStatus(
+        Long classId,
+        LinkShareStatusUpdateRequest status
+    ) {
+    OnedayClass onedayClass = onedayClassRepository.findById(classId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
+
+    if (onedayClass.isDeleted()) {
+        throw new IllegalStateException("삭제된 클래스는 링크 공유 상태를 변경할 수 없습니다.");
+    }
+
+        onedayClass.updateLinkShareStatus(status.linkShareStatus());
     }
 }

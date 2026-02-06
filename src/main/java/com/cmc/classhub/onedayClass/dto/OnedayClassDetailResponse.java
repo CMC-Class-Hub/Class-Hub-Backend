@@ -15,6 +15,7 @@ public record OnedayClassDetailResponse(
         String parkingInfo,
         String guidelines,
         String policy,
+        String linkShareStatus,
         List<SessionResponse> sessions) {
     public static OnedayClassDetailResponse from(OnedayClass entity) {
         return new OnedayClassDetailResponse(
@@ -32,6 +33,7 @@ public record OnedayClassDetailResponse(
                 entity.getParkingInfo(),
                 entity.getGuidelines(),
                 entity.getPolicy(),
+                entity.getLinkShareStatus().toString(),
                 entity.getSessions().stream()
                         .filter(s -> !s.isDeleted())
                         .map(SessionResponse::from)

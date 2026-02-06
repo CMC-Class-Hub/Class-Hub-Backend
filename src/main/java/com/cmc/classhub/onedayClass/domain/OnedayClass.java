@@ -45,6 +45,10 @@ public class OnedayClass {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private LinkShareStatus linkShareStatus; // 링크 공유 허용/비허용
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OnedayClassStatus status; // 모집중 / 마감 / 종료 / 삭제
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -89,6 +93,7 @@ public class OnedayClass {
         this.status = OnedayClassStatus.RECRUITING;
         this.createdAt = LocalDateTime.now();
         this.classCode = (classCode != null && !classCode.isEmpty()) ? classCode : generateInitialClassCode();
+        this.linkShareStatus = LinkShareStatus.ENABLED;
     }
 
     public void updateImages(List<String> imageUrls) {
@@ -151,4 +156,11 @@ public class OnedayClass {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
 
+    public void updateLinkShareStatus(LinkShareStatus status) {
+        this.linkShareStatus = status;
+    }
+
+    public boolean isLinkShareEnabled() {
+        return this.linkShareStatus == LinkShareStatus.ENABLED;
+    }
 }

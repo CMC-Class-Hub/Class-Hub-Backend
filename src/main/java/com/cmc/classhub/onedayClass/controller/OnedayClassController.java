@@ -1,5 +1,6 @@
 package com.cmc.classhub.onedayClass.controller;
 
+import com.cmc.classhub.onedayClass.dto.LinkShareStatusUpdateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
 import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
@@ -65,4 +66,13 @@ public class OnedayClassController {
     public ResponseEntity<List<SessionResponse>> getClassSessions(@PathVariable Long classId) {
         return ResponseEntity.ok(sessionService.getSessionsByClassId(classId));
     }
+
+    @PatchMapping("/{classId}/link-share-status")
+    public ResponseEntity<OnedayClassResponse> updateLinkShareStatus(
+            @PathVariable Long classId,
+           @RequestBody @Valid LinkShareStatusUpdateRequest request
+    ) {
+        onedayClassService.updateLinkShareStatus(classId, request);
+        return ResponseEntity.ok(onedayClassService.getClassById(classId));
+}
 }
