@@ -30,7 +30,7 @@ public class ReservationService {
 
         public Long createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
-                Member member = memberRepository.findByPhone(request.getPhoneNumber())
+                Member member = memberRepository.findByNameAndPhone(request.getApplicantName(), request.getPhoneNumber())
                                 .orElseGet(() -> createGuestMember(request));
 
                 // 2. 클래스 조회
