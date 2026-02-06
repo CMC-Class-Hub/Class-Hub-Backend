@@ -27,7 +27,6 @@ public class MemberService {
     }
 
     public MemberResponseDto getById(Long id) {
-        System.out.println("Students = " +  memberRepository.findById(id) + "id" + id);
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("학생이 존재하지 않습니다."));
         return new MemberResponseDto(member);

@@ -14,6 +14,6 @@ public class ReservationResponse {
     private Long studentId;
     private String applicantName;
     private String phoneNumber;
-    private LocalDateTime appliedAt;
-    private ReservationStatus status; 
+    private LocalDateTime appliedAt; 
+    private String reservationStatus;
 }

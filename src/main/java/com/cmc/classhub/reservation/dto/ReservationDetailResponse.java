@@ -21,4 +21,5 @@ public class ReservationDetailResponse {
     private Integer capacity;
     private Integer currentNum;
     private String sessionStatus;
+    private String reservationStatus;
 }

@@ -81,12 +81,12 @@ public class ReservationService {
                                                                         "회원 정보가 없습니다."));
 
                                         return ReservationResponse.builder()
-                                                        .status(reservation.getStatus())
                                                         .reservationId(reservation.getId())
                                                         .applicantName(member.getName())
                                                         .phoneNumber(member.getPhone())
                                                         .studentId(member.getId())
                                                         .appliedAt(reservation.getCreatedAt())
+                                                        .reservationStatus(reservation.getStatus().name())
                                                         .build();
                                 })
                                 .collect(Collectors.toList());
@@ -120,6 +120,7 @@ public class ReservationService {
                                 .capacity(session.getCapacity())
                                 .currentNum(session.getCurrentNum())
                                 .sessionStatus(session.getStatus().name())
+                                .reservationStatus(reservation.getStatus().name())
                                 .build();
         }
 
@@ -159,6 +160,8 @@ public class ReservationService {
                                                 .endTime(session.getEndTime())
                                                 .applicantName(member.getName())
                                                 .phoneNumber(member.getPhone())
+                                                .sessionStatus(session.getStatus().name())
+                                                .reservationStatus(reservation.getStatus().name())
                                                 .build();
                         } catch (Exception e) {
                                 return null;
