@@ -41,6 +41,6 @@ public class AuthService {
             }
 
             String token = jwtProvider.createAccessToken(instructor.getId(), instructor.getEmail());
-            return new LoginResponse(instructor.getId(), token, instructor.getName());
+            return new LoginResponse(instructor.getId(), token, instructor.getName(), instructor.getPhoneNumber());
         }
 }

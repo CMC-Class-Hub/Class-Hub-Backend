@@ -5,6 +5,10 @@ import com.cmc.classhub.onedayClass.domain.SessionStatus;
 import com.cmc.classhub.onedayClass.dto.SessionCreateRequest;
 import com.cmc.classhub.onedayClass.dto.SessionResponse;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.reservation.domain.Reservation;
+import com.cmc.classhub.reservation.domain.ReservationStatus;
+import com.cmc.classhub.reservation.repository.ReservationRepository;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +29,7 @@ public class SessionService {
 
     @PersistenceContext
     private EntityManager entityManager;
-
+    private final ReservationRepository reservationRepository;
     // 1. 클래스의 모든 세션 조회 (삭제되지 않은 것만)
     public List<SessionResponse> getSessionsByClassId(Long classId) {
         OnedayClass onedayClass = classRepository.findById(classId)
@@ -156,12 +160,25 @@ public class SessionService {
                 .filter(s -> s.getId().equals(sessionId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 세션입니다."));
+         List<Reservation> reservations = reservationRepository.findAllBySessionId(sessionId);
 
-        // ✅ Soft Delete: isDeleted를 true로 설정
+        // 예약이 하나도 없는 경우 → Hard Delete (DB에서 완전 삭제)
+        if (reservations.isEmpty()) {
+            onedayClass.getSessions().remove(session);
+            entityManager.flush();
+            return;
+        }
+
+        // 취소되지 않은 예약이 있는지 확인
+        boolean hasActiveReservation = reservations.stream()
+                .anyMatch(r -> r.getStatus() != ReservationStatus.CANCELLED);
+
+        if (hasActiveReservation) {
+            throw new IllegalStateException("취소되지 않은 예약이 존재하여 세션을 삭제할 수 없습니다.");
+        }
+        
         session.delete();
 
-        // DB에서 실제로 삭제하지 않음
-        // onedayClass.getSessions().removeIf(...) ← 이건 하드 삭제이므로 사용 안 함
     }
 
     // 7. 세션 복원 (선택사항)
@@ -174,8 +191,8 @@ public class SessionService {
                 .filter(s -> s.getId().equals(sessionId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 세션입니다."));
-
-        // ✅ 삭제된 세션 복원
+        
+       
         session.restore();
     }
 }
