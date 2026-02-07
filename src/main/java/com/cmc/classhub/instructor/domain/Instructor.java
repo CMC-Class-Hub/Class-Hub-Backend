@@ -42,4 +42,19 @@ public class Instructor {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void updateInfo(String name, String email, String phoneNumber) {
+        if (name != null && !name.isBlank()) {
+            this.name = name;
+        }
+        if (email != null && !email.isBlank()) {
+            this.email = email;
+        }
+        if (phoneNumber != null && !phoneNumber.isBlank()) {
+            this.phoneNumber = phoneNumber;
+        }
+    }
+
+    public void updatePassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 }

@@ -7,18 +7,22 @@ import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.CLASS_IMAGE;
 
 public record OnedayClassResponse(
+        
                 Long id,
                 String name,
                 List<String> imageUrls,
                 String description,
                 String location,
-                String locationDescription,
+                String locationDetails,
                 String preparation,
                 String parkingInfo,
-                String guidelines,
-                String policy,
+                String instructions,
+                String cancellationPolicy,
                 String classCode,
-                Long instructorId) {
+                Long instructorId,
+                String linkShareStatus
+        
+        ) {
         public static OnedayClassResponse from(OnedayClass onedayClass) {
                 List<String> imageUrls = onedayClass.getImages().stream()
                                 .map(CLASS_IMAGE::getImageUrl)
@@ -36,6 +40,7 @@ public record OnedayClassResponse(
                                 onedayClass.getGuidelines(),
                                 onedayClass.getPolicy(),
                                 onedayClass.getClassCode(),
-                                onedayClass.getInstructorId());
+                                onedayClass.getInstructorId(),
+                                onedayClass.getLinkShareStatus().toString());
         }
 }

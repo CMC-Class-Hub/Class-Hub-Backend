@@ -13,6 +13,7 @@ public class ReservationDetailResponse {
     private String classTitle;
     private String classImageUrl;
     private String classLocation;
+    private String classCode;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
@@ -21,4 +22,5 @@ public class ReservationDetailResponse {
     private Integer capacity;
     private Integer currentNum;
     private String sessionStatus;
+    private String reservationStatus;
 }

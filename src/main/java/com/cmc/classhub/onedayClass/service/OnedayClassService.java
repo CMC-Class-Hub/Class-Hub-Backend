@@ -2,9 +2,14 @@ package com.cmc.classhub.onedayClass.service;
 
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
+import com.cmc.classhub.onedayClass.dto.LinkShareStatusUpdateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassCreateRequest;
 import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.reservation.domain.Reservation;
+import com.cmc.classhub.reservation.domain.ReservationStatus;
+import com.cmc.classhub.reservation.repository.ReservationRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +21,7 @@ import java.util.List;
 public class OnedayClassService {
 
     private final OnedayClassRepository onedayClassRepository;
-
+    private final ReservationRepository reservationRepository;
     // 1. 강사의 모든 클래스 조회 (삭제되지 않은 것만)
     public List<OnedayClassResponse> getClassesByInstructor(Long instructorId) {
         List<OnedayClass> classes = onedayClassRepository
@@ -91,14 +96,31 @@ public class OnedayClassService {
         OnedayClass onedayClass = onedayClassRepository.findById(classId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
 
-        // ✅ Soft Delete: isDeleted를 true로 설정
-        onedayClass.delete();
+        List<Long> sessionIds = onedayClass.getSessions().stream()
+                .map(Session::getId)
+                .toList();
 
-        // ✅ 연관된 세션도 모두 Soft Delete
+        // ✅ 각 세션의 예약 상태 확인
+        List<Reservation> allReservations = reservationRepository.findAllBySessionIdIn(sessionIds);
+        
+        // 예약이 하나도 없는 경우 → Hard Delete (DB에서 완전 삭제)
+        if (allReservations.isEmpty()) {
+            onedayClassRepository.delete(onedayClass);
+            return;
+        }
+
+        // 취소되지 않은 예약이 있는지 확인
+        boolean hasActiveReservation = allReservations.stream()
+                .anyMatch(r -> r.getStatus() != ReservationStatus.CANCELLED);
+
+        if (hasActiveReservation) {
+            throw new IllegalStateException("취소되지 않은 예약이 존재하여 클래스를 삭제할 수 없습니다.");
+        }
+
+
+        onedayClass.delete();
         onedayClass.getSessions().forEach(Session::delete);
 
-        // DB에서 실제로 삭제하지 않고 isDeleted만 변경
-        // onedayClassRepository.delete(onedayClass); ← 이건 하드 삭제이므로 사용 안 함
     }
 
     // 6. 클래스 복원 (선택사항)
@@ -124,5 +146,20 @@ public class OnedayClassService {
         }
 
         return OnedayClassResponse.from(onedayClass);
+    }
+
+    @Transactional
+    public void updateLinkShareStatus(
+        Long classId,
+        LinkShareStatusUpdateRequest status
+    ) {
+    OnedayClass onedayClass = onedayClassRepository.findById(classId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
+
+    if (onedayClass.isDeleted()) {
+        throw new IllegalStateException("삭제된 클래스는 링크 공유 상태를 변경할 수 없습니다.");
+    }
+
+        onedayClass.updateLinkShareStatus(status.linkShareStatus());
     }
 }

@@ -30,7 +30,8 @@ public class ReservationService {
 
         public Long createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
-                Member member = memberRepository.findByPhone(request.getPhoneNumber())
+                Member member = memberRepository
+                                .findByNameAndPhone(request.getApplicantName(), request.getPhoneNumber())
                                 .orElseGet(() -> createGuestMember(request));
 
                 // 2. 클래스 조회
@@ -81,12 +82,12 @@ public class ReservationService {
                                                                         "회원 정보가 없습니다."));
 
                                         return ReservationResponse.builder()
-                                                        .status(reservation.getStatus())
                                                         .reservationId(reservation.getId())
                                                         .applicantName(member.getName())
                                                         .phoneNumber(member.getPhone())
                                                         .studentId(member.getId())
                                                         .appliedAt(reservation.getCreatedAt())
+                                                        .reservationStatus(reservation.getStatus().name())
                                                         .build();
                                 })
                                 .collect(Collectors.toList());
@@ -112,6 +113,7 @@ public class ReservationService {
                                 .reservationId(reservation.getId())
                                 .classTitle(onedayClass.getTitle())
                                 .classLocation(onedayClass.getLocation())
+                                .classCode(onedayClass.getClassCode())
                                 .date(session.getDate())
                                 .startTime(session.getStartTime())
                                 .endTime(session.getEndTime())
@@ -120,6 +122,7 @@ public class ReservationService {
                                 .capacity(session.getCapacity())
                                 .currentNum(session.getCurrentNum())
                                 .sessionStatus(session.getStatus().name())
+                                .reservationStatus(reservation.getStatus().name())
                                 .build();
         }
 
@@ -159,6 +162,8 @@ public class ReservationService {
                                                 .endTime(session.getEndTime())
                                                 .applicantName(member.getName())
                                                 .phoneNumber(member.getPhone())
+                                                .sessionStatus(session.getStatus().name())
+                                                .reservationStatus(reservation.getStatus().name())
                                                 .build();
                         } catch (Exception e) {
                                 return null;
