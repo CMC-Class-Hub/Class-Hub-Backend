@@ -35,6 +35,9 @@ public class Session {
     private Integer capacity; // 정원
 
     @Column(nullable = false)
+    private Integer price; // 가격
+
+    @Column(nullable = false)
     private Integer currentNum; // 현재 참여 인원
 
     @Enumerated(EnumType.STRING)
@@ -62,10 +65,12 @@ public class Session {
             LocalDate date,
             LocalTime startTime,
             LocalTime endTime,
+            Integer price,
             Integer capacity) {
         this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.price = price;
         this.capacity = capacity;
         this.currentNum = 0;
         this.status = RECRUITING;
@@ -80,6 +85,7 @@ public class Session {
             LocalDate date,
             LocalTime startTime,
             LocalTime endTime,
+            Integer price,
             Integer capacity) {
         if (date != null)
             this.date = date;
@@ -87,6 +93,8 @@ public class Session {
             this.startTime = startTime;
         if (endTime != null)
             this.endTime = endTime;
+        if (price != null)
+            this.price = price;
         if (capacity != null)
             this.capacity = capacity;
     }
@@ -117,7 +125,5 @@ public class Session {
             }
         }
     }
-
-    
 
 }

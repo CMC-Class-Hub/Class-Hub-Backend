@@ -1,6 +1,7 @@
 package com.cmc.classhub.message.service;
 
 import com.cmc.classhub.message.domain.MessageTemplateType;
+import com.cmc.classhub.message.dto.MessageTemplateMetadata;
 import com.cmc.classhub.message.dto.MessageTemplateResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -42,21 +43,31 @@ public class MessageTemplateService {
         log.info("모든 메시지 템플릿 캐싱 완료 ({}개)", templateCache.size());
     }
 
-    // 모든 템플릿 목록 조회
-    public List<MessageTemplateResponse> getTemplates() {
+    // 모든 템플릿 목록 조회 (타이틀, 설명)
+    public List<MessageTemplateMetadata> getTemplates() {
         return Arrays.stream(MessageTemplateType.values())
-                .map(this::getTemplate)
+                .map(MessageTemplateMetadata::from)
                 .collect(Collectors.toList());
     }
 
-    // 특정 템플릿 조회 (캐시 사용)
-    public MessageTemplateResponse getTemplate(MessageTemplateType type) {
+    // 특정 템플릿 조회 (타이틀로 조회)
+    public MessageTemplateResponse getTemplateByTitle(String title) {
+        MessageTemplateType type = Arrays.stream(MessageTemplateType.values())
+                .filter(t -> t.getTitle().equals(title))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 템플릿입니다: " + title));
+        return getTemplate(type);
+    }
+
+    // 특정 템플릿 조회 (내부 사용)
+    private MessageTemplateResponse getTemplate(MessageTemplateType type) {
         String body = templateCache.get(type);
         if (body == null) {
             throw new IllegalStateException("템플릿을 찾을 수 없습니다: " + type);
         }
-        String title = type.getDescription();
-        return MessageTemplateResponse.of(type, title, body);
+        String title = type.getTitle();
+        String description = type.getDescription();
+        return MessageTemplateResponse.of(type, title, description, body);
     }
 
     // 템플릿 파일 로드

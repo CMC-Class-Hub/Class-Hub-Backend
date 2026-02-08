@@ -45,7 +45,10 @@ public class SecurityConfig {
                                                                 "/api/messages/webhook",
                                                                 "/api/reservations",
                                                                 "/api/reservations/**",
-                                                                "/api/members/**")
+                                                                "/api/members/**",
+                                                                "/swagger-ui/**",
+                                                                "/swagger-ui.html",
+                                                                "/v3/api-docs/**")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
