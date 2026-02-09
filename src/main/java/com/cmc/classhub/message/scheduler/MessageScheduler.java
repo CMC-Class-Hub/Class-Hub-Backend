@@ -86,9 +86,23 @@ public class MessageScheduler {
         for (Reservation reservation : reservations) {
             try {
                 messageService.send(templateType, reservation.getId());
+                // 발송 성공 시 마킹
+                markNotificationSent(reservation, templateType);
             } catch (Exception e) {
                 log.error("발송 실패: reservationId={}, type={}", reservation.getId(), templateType, e);
             }
         }
+    }
+
+    /**
+     * 알림 발송 완료 마킹
+     */
+    private void markNotificationSent(Reservation reservation, MessageTemplateType templateType) {
+        if (templateType == MessageTemplateType.REMINDER_D3) {
+            reservation.markD3NotificationSent();
+        } else if (templateType == MessageTemplateType.REMINDER_D1) {
+            reservation.markD1NotificationSent();
+        }
+        reservationRepository.save(reservation);
     }
 }

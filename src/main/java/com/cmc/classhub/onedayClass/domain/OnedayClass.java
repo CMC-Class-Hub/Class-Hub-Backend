@@ -63,7 +63,7 @@ public class OnedayClass {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "oneday_class_id")
-    private List<CLASS_IMAGE> images = new ArrayList<>();
+    private List<ClassImage> images = new ArrayList<>();
 
     public void delete() {
         this.isDeleted = true;
@@ -100,7 +100,7 @@ public class OnedayClass {
         this.images.clear();
         if (imageUrls == null)
             return;
-        imageUrls.forEach(url -> this.images.add(CLASS_IMAGE.of(url)));
+        imageUrls.forEach(url -> this.images.add(ClassImage.of(url)));
     }
 
     public void reserveSession(Long sessionId) {

@@ -88,6 +88,8 @@ public class ReservationService {
                                                         .studentId(member.getId())
                                                         .appliedAt(reservation.getCreatedAt())
                                                         .reservationStatus(reservation.getStatus().name())
+                                                        .sentD3Notification(reservation.isSentD3Notification())
+                                                        .sentD1Notification(reservation.isSentD1Notification())
                                                         .build();
                                 })
                                 .collect(Collectors.toList());

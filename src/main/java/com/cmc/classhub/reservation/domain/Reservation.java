@@ -33,6 +33,12 @@ public class Reservation {
     private LocalDateTime confirmedAt; // 확정 일시
     private LocalDateTime cancelledAt; // 취소 일시
 
+    @Column(nullable = false)
+    private boolean sentD3Notification = false; // D-3 알림 발송 여부
+
+    @Column(nullable = false)
+    private boolean sentD1Notification = false; // D-1 알림 발송 여부
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -59,6 +65,16 @@ public class Reservation {
         }
         this.status = ReservationStatus.CANCELLED;
         this.cancelledAt = LocalDateTime.now();
+    }
+
+    // D-3 알림 발송 완료 처리
+    public void markD3NotificationSent() {
+        this.sentD3Notification = true;
+    }
+
+    // D-1 알림 발송 완료 처리
+    public void markD1NotificationSent() {
+        this.sentD1Notification = true;
     }
 
 }
