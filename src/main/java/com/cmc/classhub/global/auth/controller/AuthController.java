@@ -48,17 +48,13 @@ public class AuthController {
         return authService.login(req);
     }
 
-    @Operation(summary = "로그인 상태 확인", description = "현재 로그인 상태를 확인합니다")
     @GetMapping("/status")
-    public LoginStatusResponse checkLoginStatus(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return new LoginStatusResponse(false, null);
-        }
-
-        String username = userDetails.getUsername();
-        // demo-instructor는 실제 로그인으로 간주하지 않음
-        boolean isLoggedIn = !"demo-instructor".equals(username);
-
-        return new LoginStatusResponse(isLoggedIn, isLoggedIn ? username : null);
+    public LoginStatusResponse checkLoginStatus(@AuthenticationPrincipal Long userId) {
+    
+    if (userId == null) {
+        return new LoginStatusResponse(false, null);
     }
+    
+    return new LoginStatusResponse(true, userId.toString());
+}
 }
