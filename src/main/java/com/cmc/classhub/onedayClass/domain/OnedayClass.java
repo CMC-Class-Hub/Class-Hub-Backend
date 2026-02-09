@@ -33,8 +33,6 @@ public class OnedayClass {
 
     private String locationDescription; // 위치 안내 (상세 길안내)
 
-    private Integer price; // 정가
-
     private String material; // 준비물/재료
 
     private String parkingInfo; // 주차안내
@@ -44,6 +42,10 @@ public class OnedayClass {
     private String policy; // 규정 (취소/노쇼 규정)
 
     private String classCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LinkShareStatus linkShareStatus; // 링크 공유 허용/비허용
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -77,14 +79,13 @@ public class OnedayClass {
 
     @Builder
     public OnedayClass(Long instructorId, String title, String description,
-            String location, String locationDescription, Integer price,
+            String location, String locationDescription,
             String material, String parkingInfo, String guidelines, String policy, String classCode) {
         this.instructorId = instructorId;
         this.title = title;
         this.description = description;
         this.location = location;
         this.locationDescription = locationDescription;
-        this.price = price;
         this.material = material;
         this.parkingInfo = parkingInfo;
         this.guidelines = guidelines;
@@ -92,6 +93,7 @@ public class OnedayClass {
         this.status = OnedayClassStatus.RECRUITING;
         this.createdAt = LocalDateTime.now();
         this.classCode = (classCode != null && !classCode.isEmpty()) ? classCode : generateInitialClassCode();
+        this.linkShareStatus = LinkShareStatus.ENABLED;
     }
 
     public void updateImages(List<String> imageUrls) {
@@ -128,13 +130,12 @@ public class OnedayClass {
     }
 
     public void update(String title, String description, String location, String locationDescription,
-            Integer price, String material, String parkingInfo, String guidelines, String policy,
+            String material, String parkingInfo, String guidelines, String policy,
             List<String> imageUrls) {
         this.title = title;
         this.description = description;
         this.location = location;
         this.locationDescription = locationDescription;
-        this.price = price;
         this.material = material;
         this.parkingInfo = parkingInfo;
         this.guidelines = guidelines;
@@ -155,4 +156,11 @@ public class OnedayClass {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
 
+    public void updateLinkShareStatus(LinkShareStatus status) {
+        this.linkShareStatus = status;
+    }
+
+    public boolean isLinkShareEnabled() {
+        return this.linkShareStatus == LinkShareStatus.ENABLED;
+    }
 }

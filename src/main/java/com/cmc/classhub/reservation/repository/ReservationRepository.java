@@ -23,4 +23,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     // 상태별 조회 추가
     @Query("SELECT r FROM Reservation r WHERE r.sessionId = :sessionId AND r.status IN ('PENDING', 'CONFIRMED')")
     List<Reservation> findActiveReservationsBySessionId(@Param("sessionId") Long sessionId);
+    
+    @Query("SELECT r FROM Reservation r WHERE r.sessionId IN :sessionIds")
+    List<Reservation> findAllBySessionIdIn(@Param("sessionIds") List<Long> sessionIds);
 }

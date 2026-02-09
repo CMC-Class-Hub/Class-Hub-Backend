@@ -53,6 +53,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Swagger (SpringDoc OpenAPI)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
 	//AWS S3
   implementation platform('software.amazon.awssdk:bom:2.25.63')
 implementation 'software.amazon.awssdk:s3'
