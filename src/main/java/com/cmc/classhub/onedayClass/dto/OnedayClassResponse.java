@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 
-import com.cmc.classhub.onedayClass.domain.CLASS_IMAGE;
+import com.cmc.classhub.onedayClass.domain.ClassImage;
 
 @Schema(description = "원데이클래스 응답")
 public record OnedayClassResponse(
@@ -50,7 +50,7 @@ public record OnedayClassResponse(
         ) {
         public static OnedayClassResponse from(OnedayClass onedayClass) {
                 List<String> imageUrls = onedayClass.getImages().stream()
-                                .map(CLASS_IMAGE::getImageUrl)
+                                .map(ClassImage::getImageUrl)
                                 .toList();
 
                 return new OnedayClassResponse(

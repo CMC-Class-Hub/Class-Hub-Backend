@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "CLASS_IMAGE")
+@Table(name = "class_images")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CLASS_IMAGE {
+public class ClassImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,11 +18,11 @@ public class CLASS_IMAGE {
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
-    protected CLASS_IMAGE(String imageUrl) {
+    protected ClassImage(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
-    public static CLASS_IMAGE of(String imageUrl) {
-        return new CLASS_IMAGE(imageUrl);
+    public static ClassImage of(String imageUrl) {
+        return new ClassImage(imageUrl);
     }
 }
