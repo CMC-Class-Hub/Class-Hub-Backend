@@ -27,8 +27,11 @@ public class SolapiKakaoClient implements MessageClient {
     @Override
     public MessageSendResult sendWithTemplate(String receiver, String templateId, Map<String, String> variables) {
         try {
+            // 하이픈, 공백 등 제거하여 숫자만 추출
+            String cleanedReceiver = receiver.replaceAll("[^0-9]", "");
+
             Message message = new Message();
-            message.setTo(receiver);
+            message.setTo(cleanedReceiver);
             message.setFrom(config.getFrom());
 
             KakaoOption kakaoOption = new KakaoOption();
