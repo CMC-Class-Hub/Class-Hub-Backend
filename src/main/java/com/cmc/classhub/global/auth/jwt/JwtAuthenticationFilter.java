@@ -10,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -67,9 +66,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   private String parseBearerToken(HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-      return bearerToken.substring(7);
+    if (request.getCookies() == null) {
+      return null;
+    }
+    for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+      if (cookie.getName().equals("accessToken")) {
+        return cookie.getValue();
+      }
     }
     return null;
   }
