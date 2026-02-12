@@ -18,7 +18,7 @@ public class AdminInitializer implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    String adminEmail = "admin@admin.admin";
+    String adminEmail = "admin@classhub.com";
 
     if (instructorRepository.existsByEmail(adminEmail)) {
       return;
