@@ -26,13 +26,14 @@ public class JwtProvider {
         this.refreshExpMillis = refreshExpSeconds * 1000L;
     }
 
-    public String createAccessToken(Long userId, String email) {
+    public String createAccessToken(Long userId, String email, String role) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + accessExpMillis);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("email", email)
+                .claim("role", role)
                 .claim("type", "access")
                 .setIssuedAt(now)
                 .setExpiration(exp)
@@ -68,5 +69,12 @@ public class JwtProvider {
                 .getBody()
                 .getSubject();
         return Long.valueOf(sub);
+    }
+
+    public String parseRole(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
     }
 }
