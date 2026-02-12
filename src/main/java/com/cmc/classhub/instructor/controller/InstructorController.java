@@ -9,12 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Instructor", description = "강사 관리 API")
 @RestController
@@ -37,6 +32,14 @@ public class InstructorController {
             @Parameter(description = "강사 ID") @PathVariable Long instructorId,
             @RequestBody InstructorUpdateRequest request) {
         instructorService.updateInstructor(instructorId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "강사 탈퇴", description = "강사 정보를 삭제(탈퇴) 처리하고 관련 클래스들도 모두 삭제합니다")
+    @DeleteMapping("/{instructorId}")
+    public ResponseEntity<Void> withdraw(
+            @Parameter(description = "강사 ID") @PathVariable Long instructorId) {
+        instructorService.withdraw(instructorId);
         return ResponseEntity.ok().build();
     }
 }

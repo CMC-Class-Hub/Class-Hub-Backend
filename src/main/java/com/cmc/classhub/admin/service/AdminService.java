@@ -18,7 +18,7 @@ public class AdminService {
   private final OnedayClassRepository onedayClassRepository;
 
   public List<InstructorAdminResponse> getAllInstructorsInfo() {
-    return instructorRepository.findAll().stream()
+    return instructorRepository.findByIsDeletedFalse().stream()
         .map(instructor -> {
           long classCount = onedayClassRepository.countByInstructorId(instructor.getId());
           long sessionCount = onedayClassRepository.countSessionsByInstructorId(instructor.getId());
