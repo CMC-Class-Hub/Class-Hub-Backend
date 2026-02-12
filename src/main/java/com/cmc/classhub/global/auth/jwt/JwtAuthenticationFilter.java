@@ -49,12 +49,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       if (token != null) {
         Long userId = jwtProvider.parseUserId(token);
+        String role = jwtProvider.parseRole(token);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
             userId,
             null,
-            Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")) // 임시 Role
-        );
+            Collections.singleton(new SimpleGrantedAuthority(role)));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }

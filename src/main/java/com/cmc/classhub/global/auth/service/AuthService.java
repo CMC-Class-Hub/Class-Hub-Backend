@@ -6,6 +6,7 @@ import com.cmc.classhub.global.auth.dto.LoginResultDto;
 import com.cmc.classhub.global.auth.dto.TokenDto;
 import com.cmc.classhub.global.auth.dto.SignUpRequest;
 import com.cmc.classhub.global.auth.jwt.JwtProvider;
+import com.cmc.classhub.global.auth.domain.Role;
 import com.cmc.classhub.instructor.domain.Instructor;
 import com.cmc.classhub.instructor.repository.InstructorRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,13 @@ public class AuthService {
         }
 
         String hash = passwordEncoder.encode(req.password());
-        Instructor instructor = new Instructor(req.name(), req.email(), req.phoneNumber(), hash);
+        Instructor instructor = Instructor.builder()
+                .name(req.name())
+                .email(req.email())
+                .phoneNumber(req.phoneNumber())
+                .passwordHash(hash)
+                .role(Role.USER) // 회원가입 시 기본값은 일반 유저
+                .build();
         instructorRepository.save(instructor);
         return instructor.getId();
     }
@@ -42,11 +49,15 @@ public class AuthService {
             throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        String accessToken = jwtProvider.createAccessToken(instructor.getId(), instructor.getEmail());
+        String accessToken = jwtProvider.createAccessToken(instructor.getId(), instructor.getEmail(),
+                instructor.getRole().getKey());
         String refreshToken = jwtProvider.createRefreshToken(instructor.getId());
 
-        LoginResponse loginResponse = new LoginResponse(instructor.getId(), instructor.getName(),
-                instructor.getPhoneNumber());
+        LoginResponse loginResponse = new LoginResponse(
+                instructor.getId(),
+                instructor.getName(),
+                instructor.getPhoneNumber(),
+                instructor.getRole());
         TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
 
         return new LoginResultDto(loginResponse, tokenDto);
@@ -61,7 +72,8 @@ public class AuthService {
         Instructor instructor = instructorRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        String newAccessToken = jwtProvider.createAccessToken(instructor.getId(), instructor.getEmail());
+        String newAccessToken = jwtProvider.createAccessToken(instructor.getId(), instructor.getEmail(),
+                instructor.getRole().getKey());
         String newRefreshToken = jwtProvider.createRefreshToken(instructor.getId());
 
         return new TokenDto(newAccessToken, newRefreshToken);

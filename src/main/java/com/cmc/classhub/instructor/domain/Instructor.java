@@ -1,5 +1,6 @@
 package com.cmc.classhub.instructor.domain;
 
+import com.cmc.classhub.global.auth.domain.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -30,6 +31,10 @@ public class Instructor {
     @Column(nullable = false, length = 100)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -37,11 +42,12 @@ public class Instructor {
     private boolean isDeleted = false;
 
     @Builder
-    public Instructor(String name, String email, String phoneNumber, String passwordHash) {
+    public Instructor(String name, String email, String phoneNumber, String passwordHash, Role role) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.passwordHash = passwordHash;
+        this.role = (role == null) ? Role.USER : role;
         this.createdAt = LocalDateTime.now();
         this.isDeleted = false;
     }
