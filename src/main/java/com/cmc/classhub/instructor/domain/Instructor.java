@@ -27,11 +27,14 @@ public class Instructor {
     @Column(nullable = false)
     private String phoneNumber; // 전화번호
 
-    @Column(nullable=false, length=100)
+    @Column(nullable = false, length = 100)
     private String passwordHash;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private boolean isDeleted = false;
 
     @Builder
     public Instructor(String name, String email, String phoneNumber, String passwordHash) {
@@ -40,6 +43,7 @@ public class Instructor {
         this.phoneNumber = phoneNumber;
         this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
+        this.isDeleted = false;
     }
 
     public void updateInfo(String name, String email, String phoneNumber) {
@@ -56,5 +60,9 @@ public class Instructor {
 
     public void updatePassword(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

@@ -1,5 +1,6 @@
 package com.cmc.classhub.instructor.service;
 
+import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.dto.OnedayClassDetailResponse;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.instructor.domain.Instructor;
@@ -25,13 +26,13 @@ public class InstructorService {
     @Transactional
     public Long loginOrRegister(InstructorLoginRequest request) {
         return instructorRepository.findByNameAndPhoneNumber(
-                        request.name(), request.phoneNumber())
+                request.name(), request.phoneNumber())
                 .orElseGet(() -> instructorRepository.save(
                         Instructor.builder()
                                 .name(request.name())
                                 .phoneNumber(request.phoneNumber())
-                                .build()
-                )).getId();
+                                .build()))
+                .getId();
     }
 
     public List<OnedayClassDetailResponse> getMyClasses(Long instructorId) {
@@ -39,7 +40,8 @@ public class InstructorService {
                 .map(OnedayClassDetailResponse::from)
                 .toList();
     }
-     @Transactional
+
+    @Transactional
     public void updateInstructor(Long instructorId, InstructorUpdateRequest request) {
         Instructor instructor = instructorRepository.findById(instructorId)
                 .orElseThrow(() -> new IllegalArgumentException("강사를 찾을 수 없습니다."));
@@ -49,5 +51,17 @@ public class InstructorService {
         if (request.password() != null && !request.password().isBlank()) {
             instructor.updatePassword(passwordEncoder.encode(request.password()));
         }
+    }
+
+    @Transactional
+    public void withdraw(Long instructorId) {
+        Instructor instructor = instructorRepository.findById(instructorId)
+                .orElseThrow(() -> new IllegalArgumentException("강사를 찾을 수 없습니다."));
+
+        instructor.delete();
+
+        // 강사가 개설한 모든 클래스 삭제 처리
+        onedayClassRepository.findByInstructorIdAndIsDeletedFalse(instructorId)
+                .forEach(OnedayClass::delete);
     }
 }
