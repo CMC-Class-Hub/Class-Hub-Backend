@@ -10,6 +10,8 @@ import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
 import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
+
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -177,16 +179,25 @@ public class ReservationService {
                 Reservation reservation = reservationRepository.findById(reservationId)
                                 .orElseThrow();
 
-                // 1. 예약 상태 변경 (CANCELLED)
-                reservation.cancel();
-
-                // 2. 세션 인원 감소
+                // 1. 세션 조회
                 OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSessionId())
                                 .orElseThrow(() -> new IllegalArgumentException("세션이 속한 클래스를 찾을 수 없습니다."));
                 Session session = onedayClass.getSessions().stream()
                                 .filter(s -> s.getId().equals(reservation.getSessionId()))
                                 .findFirst()
                                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
+
+                // 2. 세션 시작 12시간 전까지만 취소 가능
+                LocalDateTime sessionStart = LocalDateTime.of(session.getDate(), session.getStartTime());
+                LocalDateTime deadline = sessionStart.minusHours(12);
+                if (LocalDateTime.now().isAfter(deadline)) {
+                        throw new IllegalStateException("세션 시작 12시간 전까지만 취소 가능합니다.");
+                }
+
+                // 3. 예약 상태 변경 (CANCELLED)
+                reservation.cancel();
+
+                // 4. 세션 인원 감소
                 session.cancel();
 
                 // Note: 예약 엔티티는 삭제하지 않고 이력 관리
