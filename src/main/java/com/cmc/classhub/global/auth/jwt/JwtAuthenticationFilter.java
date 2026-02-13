@@ -23,24 +23,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtProvider jwtProvider;
 
   @Override
-  protected boolean shouldNotFilter(jakarta.servlet.http.HttpServletRequest request) {
-    String origin = request.getHeader("Origin");
-    String path = request.getRequestURI();
-
-    if (origin != null && (origin.equals("https://classhub-link.vercel.app") ||
-        origin.equals("http://localhost:3001"))) {
-      return true;
-    }
-
-    return path.startsWith("/api/auth/login") ||
-        path.startsWith("/api/auth/signup") ||
-        path.startsWith("/api/reservations") ||
-        path.startsWith("/api/students") ||
-        path.equals("/health") ||
-        path.startsWith("/h2-console");
-  }
-
-  @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
