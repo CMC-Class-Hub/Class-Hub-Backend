@@ -5,7 +5,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
 
 message:
@@ -36,7 +36,7 @@ aws:
     secret-key: ${AWS_SECRET_KEY}
 
 cors:
-  allowed-origins: https://classhub-dashboard.vercel.app, https://classhub-link.vercel.app
+  allowed-origins: https://classhub-dashboard.vercel.app, https://classhub-link.vercel.app, https://dashboard.classhub.site, https://apply.classhub.site
 
 # 운영 환경에서 Swagger 비활성화
 springdoc:
