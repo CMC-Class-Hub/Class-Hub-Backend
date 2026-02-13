@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -89,36 +91,44 @@ public class AuthController {
     }
 
     private void setTokenCookies(HttpServletResponse response, TokenDto tokenDto) {
-        Cookie accessCookie = new Cookie("accessToken", tokenDto.accessToken());
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(isSecure);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge((int) accessExp);
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokenDto.accessToken())
+                .httpOnly(true)
+                .secure(isSecure)          // 운영 HTTPS면 true
+                .sameSite("None")          // ⭐ 핵심
+                .path("/")
+                .maxAge(accessExp)
+                .build();
 
-        Cookie refreshCookie = new Cookie("refreshToken", tokenDto.refreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(isSecure);
-        refreshCookie.setPath("/api/auth");
-        refreshCookie.setMaxAge((int) refreshExp);
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenDto.refreshToken())
+                .httpOnly(true)
+                .secure(isSecure)
+                .sameSite("None")          // ⭐ 핵심
+                .path("/api/auth")         // 지금처럼 제한해도 OK
+                .maxAge(refreshExp)
+                .build();
 
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 
     private void clearTokenCookies(HttpServletResponse response) {
-        Cookie accessCookie = new Cookie("accessToken", null);
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(isSecure);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(0);
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(isSecure)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
 
-        Cookie refreshCookie = new Cookie("refreshToken", null);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(isSecure);
-        refreshCookie.setPath("/api/auth");
-        refreshCookie.setMaxAge(0);
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(isSecure)
+                .sameSite("None")
+                .path("/api/auth")
+                .maxAge(0)
+                .build();
 
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 }
