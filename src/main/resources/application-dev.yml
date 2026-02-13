@@ -29,4 +29,4 @@ image:
   provider: console
 
 cors:
-  allowed-origins: http://localhost:3000, http://localhost:3001, https://classhub-dashboard.vercel.app, https://classhub-link.vercel.app
+  allowed-origins: http://localhost:3000, http://localhost:3001, https://classhub-dashboard.vercel.app, https://classhub-link.vercel.app, https://dashboard.classhub.site, https://apply.classhub.site
