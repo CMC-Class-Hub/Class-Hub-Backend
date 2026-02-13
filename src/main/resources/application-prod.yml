@@ -36,7 +36,7 @@ aws:
     secret-key: ${AWS_SECRET_KEY}
 
 cors:
-  allowed-origins: https://classhub-dashboard.vercel.app, https://classhub-link.vercel.app, https://dashboard.classhub.site, https://apply.classhub.site
+  allowed-origins: https://dashboard.classhub.site, https://apply.classhub.site
 
 # 운영 환경에서 Swagger 비활성화
 springdoc:
