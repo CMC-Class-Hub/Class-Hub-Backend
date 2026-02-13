@@ -10,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -24,24 +23,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtProvider jwtProvider;
 
   @Override
-  protected boolean shouldNotFilter(jakarta.servlet.http.HttpServletRequest request) {
-    String origin = request.getHeader("Origin");
-    String path = request.getRequestURI();
-
-    if (origin != null && (origin.equals("https://classhub-link.vercel.app") ||
-        origin.equals("http://localhost:3001"))) {
-      return true;
-    }
-
-    return path.startsWith("/api/auth/login") ||
-        path.startsWith("/api/auth/signup") ||
-        path.startsWith("/api/reservations") ||
-        path.startsWith("/api/students") ||
-        path.equals("/health") ||
-        path.startsWith("/h2-console");
-  }
-
-  @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
@@ -50,12 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       if (token != null) {
         Long userId = jwtProvider.parseUserId(token);
+        String role = jwtProvider.parseRole(token);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
             userId,
             null,
-            Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")) // 임시 Role
-        );
+            Collections.singleton(new SimpleGrantedAuthority(role)));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
@@ -67,9 +48,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   private String parseBearerToken(HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-      return bearerToken.substring(7);
+    if (request.getCookies() == null) {
+      return null;
+    }
+    for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+      if (cookie.getName().equals("accessToken")) {
+        return cookie.getValue();
+      }
     }
     return null;
   }

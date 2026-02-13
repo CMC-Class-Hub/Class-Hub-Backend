@@ -19,6 +19,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -39,17 +40,17 @@ public class SecurityConfig {
                                                 org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(
-                                                                "/api/auth/**",
                                                                 "/health",
                                                                 "/h2-console/**",
-                                                                "/api/messages/webhook",
-                                                                "/api/reservations",
-                                                                "/api/reservations/**",
-                                                                "/api/members/**",
                                                                 "/swagger-ui/**",
                                                                 "/swagger-ui.html",
-                                                                "/v3/api-docs/**")
+                                                                "/v3/api-docs/**",
+                                                                "/api/auth/**",
+                                                                "/api/messages/webhook",
+                                                                "/api/reservations/**",
+                                                                "/api/members/**")
                                                 .permitAll()
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

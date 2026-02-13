@@ -5,7 +5,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
     show-sql: true
 
 message:
@@ -20,7 +20,10 @@ message:
 security:
   jwt:
     secret: ${JWT_SECRET}
-    access-exp-seconds: 3600
+    access-exp-seconds: 900
+    refresh-exp-seconds: 604800
+    cookie:
+      secure: ${JWT_COOKIE_SECURE:true}
 
 image:
   provider: s3
