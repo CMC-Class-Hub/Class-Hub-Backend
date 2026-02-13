@@ -1,5 +1,6 @@
 package com.cmc.classhub.global.init;
 
+import com.cmc.classhub.global.auth.domain.Role;
 import com.cmc.classhub.instructor.domain.Instructor;
 import com.cmc.classhub.instructor.repository.InstructorRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class TestInitializer implements ApplicationRunner {
             .email(demoEmail)
             .phoneNumber("010-0000-0000")
             .passwordHash(passwordEncoder.encode("demo1234"))
+            .role(Role.USER)
             .build();
 
         instructorRepository.save(demoInstructor);
