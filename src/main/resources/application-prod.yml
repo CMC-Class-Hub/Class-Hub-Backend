@@ -15,7 +15,7 @@ message:
       api-key: ${SOLAPI_API_KEY}
       api-secret: ${SOLAPI_API_SECRET}
       from: ${SOLAPI_FROM}
-      pf-id: ${KAKAO_PF_ID}  # 카카오톡 채널 발신프로필 ID
+      pf-id: ${KAKAO_PF_ID} # 카카오톡 채널 발신프로필 ID
 
 security:
   jwt:
@@ -44,3 +44,6 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+server:
+  forward-headers-strategy: native
