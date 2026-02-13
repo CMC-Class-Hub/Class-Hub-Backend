@@ -29,7 +29,7 @@ public class TestInitializer implements ApplicationRunner {
             .name("test")
             .email(demoEmail)
             .phoneNumber("010-0000-0000")
-            .passwordHash(passwordEncoder.encode("demo1234"))
+            .passwordHash(passwordEncoder.encode("test1234"))
             .role(Role.USER)
             .build();
 
