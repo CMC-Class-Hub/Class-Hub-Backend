@@ -9,9 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -60,26 +61,21 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<Void> refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = null;
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("refreshToken")) {
-                    refreshToken = cookie.getValue();
-                }
-            }
-        }
+        refreshToken = Optional.ofNullable(request.getCookies())
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
 
         if (refreshToken == null) {
             return ResponseEntity.status(401).build();
         }
 
-        try {
-            TokenDto tokenDto = authService.refresh(refreshToken);
-            setTokenCookies(response, tokenDto);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            clearTokenCookies(response);
-            return ResponseEntity.status(401).build();
-        }
+        TokenDto tokenDto = authService.refresh(refreshToken);
+        setTokenCookies(response, tokenDto);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/status")
@@ -91,42 +87,35 @@ public class AuthController {
     }
 
     private void setTokenCookies(HttpServletResponse response, TokenDto tokenDto) {
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokenDto.accessToken())
-                .httpOnly(true)
-                .secure(isSecure)          // 운영 HTTPS면 true
-                .path("/")
-                .maxAge(accessExp)
-                .build();
+        Cookie accessCookie = new Cookie("accessToken", tokenDto.accessToken());
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(isSecure);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge((int) accessExp);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenDto.refreshToken())
-                .httpOnly(true)
-                .secure(isSecure)
-                .path("/api/auth")         // 지금처럼 제한해도 OK
-                .maxAge(refreshExp)
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        Cookie refreshCookie = new Cookie("refreshToken", tokenDto.refreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(isSecure);
+        refreshCookie.setPath("/api/auth");
+        refreshCookie.setMaxAge((int) refreshExp);
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
     }
 
     private void clearTokenCookies(HttpServletResponse response) {
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .secure(isSecure)
-                .sameSite("None")
-                .path("/")
-                .maxAge(0)
-                .build();
+        Cookie accessCookie = new Cookie("accessToken", null);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(isSecure);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(0);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(isSecure)
-                .sameSite("None")
-                .path("/api/auth")
-                .maxAge(0)
-                .build();
+        Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(isSecure);
+        refreshCookie.setPath("/api/auth");
+        refreshCookie.setMaxAge(0);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
     }
 }

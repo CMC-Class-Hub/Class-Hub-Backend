@@ -34,9 +34,9 @@ public class UploadController {
 
         @Operation(summary = "Presigned URL 생성", description = "S3 업로드를 위한 Presigned URL을 생성합니다")
         @ApiResponses({
-                @ApiResponse(responseCode = "200", description = "URL 생성 성공"),
-                @ApiResponse(responseCode = "400", description = "허용되지 않는 파일 타입"),
-                @ApiResponse(responseCode = "500", description = "서버 오류")
+                        @ApiResponse(responseCode = "200", description = "URL 생성 성공"),
+                        @ApiResponse(responseCode = "400", description = "허용되지 않는 파일 타입"),
+                        @ApiResponse(responseCode = "500", description = "서버 오류")
         })
         @PostMapping("/presigned-url")
         public ResponseEntity<PresignedUrlResponse> generatePresignedUrl(
@@ -50,14 +50,9 @@ public class UploadController {
                         return ResponseEntity.badRequest().build();
                 }
 
-                try {
-                        PresignedUrlResponse response = imageClient.generatePresignedUrl(request.getFileName(),
-                                        request.getFileType());
-                        log.info("✅ Presigned URL 생성 완료 (Client: {})", imageClient.getClass().getSimpleName());
-                        return ResponseEntity.ok(response);
-                } catch (Exception e) {
-                        log.error("❌ Presigned URL 생성 실패", e);
-                        return ResponseEntity.internalServerError().build();
-                }
+                PresignedUrlResponse response = imageClient.generatePresignedUrl(request.getFileName(),
+                                request.getFileType());
+                log.info("✅ Presigned URL 생성 완료 (Client: {})", imageClient.getClass().getSimpleName());
+                return ResponseEntity.ok(response);
         }
 }
