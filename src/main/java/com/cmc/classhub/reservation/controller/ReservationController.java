@@ -83,10 +83,13 @@ public class ReservationController {
         return ResponseEntity.ok(onedayClassService.getClassByCode(classCode));
     }
 
-    @Operation(summary = "클래스의 세션 목록 조회", description = "클래스 ID로 세션 목록을 조회합니다 (공개용)")
+    @Operation(summary = "클래스의 세션 목록 조회", description = "클래스 ID로 세션 목록을 조회합니다 (공개용, 지난 날짜 제외)")
     @GetMapping("/{classId}/sessions")
     public ResponseEntity<List<SessionResponse>> getClassSessions(
             @Parameter(description = "클래스 ID") @PathVariable Long classId) {
-        return ResponseEntity.ok(sessionService.getSessionsByClassId(classId));
+        return ResponseEntity.ok(
+                sessionService.getUpcomingSessionsByClassId(classId)
+        );
     }
+
 }
