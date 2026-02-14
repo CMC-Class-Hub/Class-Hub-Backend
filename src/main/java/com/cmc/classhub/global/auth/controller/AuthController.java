@@ -94,7 +94,6 @@ public class AuthController {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokenDto.accessToken())
                 .httpOnly(true)
                 .secure(isSecure)          // 운영 HTTPS면 true
-                .sameSite("None")          // ⭐ 핵심
                 .path("/")
                 .maxAge(accessExp)
                 .build();
@@ -102,7 +101,6 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenDto.refreshToken())
                 .httpOnly(true)
                 .secure(isSecure)
-                .sameSite("None")          // ⭐ 핵심
                 .path("/api/auth")         // 지금처럼 제한해도 OK
                 .maxAge(refreshExp)
                 .build();
