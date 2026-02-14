@@ -36,7 +36,6 @@ public class MemberService {
     public MemberResponseDto create(CreateMemberRequest request) {
         Member member = Member.builder()
                 .name(request.getName())
-                .password(request.getPassword())
                 .phone(request.getPhone())
                 .build();
 
