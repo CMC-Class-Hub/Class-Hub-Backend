@@ -9,6 +9,7 @@ import com.cmc.classhub.reservation.domain.Reservation;
 import com.cmc.classhub.reservation.domain.ReservationStatus;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -194,5 +195,22 @@ public class SessionService {
         
        
         session.restore();
+    }
+
+     public List<SessionResponse> getUpcomingSessionsByClassId(Long classId) {
+                OnedayClass onedayClass = classRepository.findById(classId)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
+
+                if (onedayClass.isDeleted()) {
+                        throw new IllegalArgumentException("삭제된 클래스입니다.");
+                }
+
+                LocalDate today = LocalDate.now();
+                
+                return onedayClass.getSessions().stream()
+                        .filter(session -> !session.isDeleted())
+                        .filter(session -> !session.getDate().isBefore(today)) // 🔥 오늘 이전 날짜 제외
+                        .map(SessionResponse::from)
+                        .toList();
     }
 }

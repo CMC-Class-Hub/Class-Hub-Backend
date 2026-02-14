@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.cmc.classhub.global.error.exception.InvalidTokenException;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +66,7 @@ public class AuthService {
 
     public TokenDto refresh(String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
+            throw new InvalidTokenException("유효하지 않은 리프레시 토큰입니다.");
         }
 
         Long userId = jwtProvider.parseUserId(refreshToken);

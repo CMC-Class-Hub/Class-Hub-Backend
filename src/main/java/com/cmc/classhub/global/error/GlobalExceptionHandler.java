@@ -7,10 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
+import jakarta.servlet.http.HttpServletResponse;
 import com.cmc.classhub.global.error.dto.ErrorResponse;
+import com.cmc.classhub.global.error.exception.InvalidTokenException;
+import com.cmc.classhub.global.auth.jwt.JwtCookieManager;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final JwtCookieManager jwtCookieManager;
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
@@ -27,13 +36,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message", e.getMessage()));
     }
+
     @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthException(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("UNAUTHORIZED", "로그인이 필요합니다."));
     }
-    
+
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(Exception e) {
         return ResponseEntity
@@ -43,9 +53,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        e.printStackTrace(); // 개발 중엔 꼭
+        log.error("Internal Server Error", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다."));
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Void> handleInvalidToken(InvalidTokenException e, HttpServletResponse response) {
+        log.warn("Invalid Token: {}", e.getMessage());
+
+        jwtCookieManager.clearTokenCookies(response);
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
