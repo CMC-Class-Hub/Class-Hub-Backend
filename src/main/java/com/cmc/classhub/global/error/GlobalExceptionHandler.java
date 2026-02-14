@@ -7,20 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import com.cmc.classhub.global.error.dto.ErrorResponse;
 import com.cmc.classhub.global.error.exception.InvalidTokenException;
-
+import com.cmc.classhub.global.auth.jwt.JwtCookieManager;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    @Value("${security.jwt.cookie.secure}")
-    private boolean isSecure;
+    private final JwtCookieManager jwtCookieManager;
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
@@ -64,20 +63,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Void> handleInvalidToken(InvalidTokenException e, HttpServletResponse response) {
         log.warn("Invalid Token: {}", e.getMessage());
 
-        Cookie accessCookie = new Cookie("accessToken", null);
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(isSecure);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(0);
-
-        Cookie refreshCookie = new Cookie("refreshToken", null);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(isSecure);
-        refreshCookie.setPath("/api/auth");
-        refreshCookie.setMaxAge(0);
-
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
+        jwtCookieManager.clearTokenCookies(response);
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

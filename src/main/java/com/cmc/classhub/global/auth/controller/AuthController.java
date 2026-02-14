@@ -2,6 +2,7 @@ package com.cmc.classhub.global.auth.controller;
 
 import com.cmc.classhub.global.auth.dto.*;
 import com.cmc.classhub.global.auth.service.AuthService;
+import com.cmc.classhub.global.auth.jwt.JwtCookieManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -12,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,15 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-
-    @Value("${security.jwt.cookie.secure}")
-    private boolean isSecure;
-
-    @Value("${security.jwt.access-exp-seconds}")
-    private long accessExp;
-
-    @Value("${security.jwt.refresh-exp-seconds}")
-    private long refreshExp;
+    private final JwtCookieManager jwtCookieManager;
 
     @Operation(summary = "회원가입", description = "새로운 강사 계정을 생성합니다")
     @PostMapping("/signup")
@@ -45,7 +37,8 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest req, HttpServletResponse response) {
         LoginResultDto result = authService.login(req);
 
-        setTokenCookies(response, result.tokenDto());
+        jwtCookieManager.addAccessTokenCookie(response, result.tokenDto().accessToken());
+        jwtCookieManager.addRefreshTokenCookie(response, result.tokenDto().refreshToken());
 
         return ResponseEntity.ok(result.loginResponse());
     }
@@ -53,7 +46,7 @@ public class AuthController {
     @Operation(summary = "로그아웃", description = "쿠키를 제거하여 로그아웃합니다")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        clearTokenCookies(response);
+        jwtCookieManager.clearTokenCookies(response);
         return ResponseEntity.ok().build();
     }
 
@@ -74,7 +67,8 @@ public class AuthController {
         }
 
         TokenDto tokenDto = authService.refresh(refreshToken);
-        setTokenCookies(response, tokenDto);
+        jwtCookieManager.addAccessTokenCookie(response, tokenDto.accessToken());
+        jwtCookieManager.addRefreshTokenCookie(response, tokenDto.refreshToken());
         return ResponseEntity.ok().build();
     }
 
@@ -86,36 +80,4 @@ public class AuthController {
         return new LoginStatusResponse(true, userId.toString());
     }
 
-    private void setTokenCookies(HttpServletResponse response, TokenDto tokenDto) {
-        Cookie accessCookie = new Cookie("accessToken", tokenDto.accessToken());
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(isSecure);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge((int) accessExp);
-
-        Cookie refreshCookie = new Cookie("refreshToken", tokenDto.refreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(isSecure);
-        refreshCookie.setPath("/api/auth");
-        refreshCookie.setMaxAge((int) refreshExp);
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
-    }
-
-    private void clearTokenCookies(HttpServletResponse response) {
-        Cookie accessCookie = new Cookie("accessToken", null);
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(isSecure);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(0);
-
-        Cookie refreshCookie = new Cookie("refreshToken", null);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(isSecure);
-        refreshCookie.setPath("/api/auth");
-        refreshCookie.setMaxAge(0);
-
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
-    }
 }
