@@ -21,6 +21,9 @@ public class Reservation {
     @Column(name = "session_id", nullable = false)
     private Long sessionId;
 
+    @Column(nullable = false, unique = true)
+    private String reservationCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -46,6 +49,7 @@ public class Reservation {
     private Reservation(Long sessionId, Member member) {
         this.sessionId = sessionId;
         this.member = member;
+        this.reservationCode = java.util.UUID.randomUUID().toString();
         this.status = ReservationStatus.CONFIRMED;
         this.createdAt = LocalDateTime.now();
     }

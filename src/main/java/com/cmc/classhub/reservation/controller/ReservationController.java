@@ -35,11 +35,11 @@ public class ReservationController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @PostMapping
-    public ResponseEntity<Long> reserve(
+    public ResponseEntity<String> reserve(
             @Parameter(description = "클래스 ID") @RequestParam Long onedayClassId,
             @RequestBody @Valid ReservationRequest request) {
-        Long reservationId = reservationService.createReservation(request, onedayClassId);
-        return ResponseEntity.ok(reservationId);
+        String reservationCode = reservationService.createReservation(request, onedayClassId);
+        return ResponseEntity.ok(reservationCode);
     }
 
     @Operation(summary = "세션별 예약 목록 조회", description = "특정 세션의 예약 목록을 조회합니다")
@@ -50,37 +50,44 @@ public class ReservationController {
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "예약 상세 조회", description = "특정 예약의 상세 정보를 조회합니다")
-    @GetMapping("/{reservationId}")
+    @Operation(summary = "예약 상세 조회", description = "예약 코드로 상세 정보를 조회합니다")
+    @GetMapping("/{reservationCode}")
     public ResponseEntity<ReservationDetailResponse> getReservationDetail(
-            @Parameter(description = "예약 ID") @PathVariable Long reservationId) {
-        ReservationDetailResponse response = reservationService.getReservationDetails(reservationId);
+            @Parameter(description = "예약 코드") @PathVariable String reservationCode) {
+        ReservationDetailResponse response = reservationService.getReservationDetails(reservationCode);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 예약 검색", description = "이름, 전화번호, 비밀번호로 본인의 예약을 검색합니다")
+    @Operation(summary = "내 예약 검색", description = "이름과 전화번호로 본인의 예약을 검색합니다")
     @GetMapping("/search")
     public ResponseEntity<List<ReservationDetailResponse>> searchReservations(
             @Parameter(description = "예약자 이름") @RequestParam String name,
-            @Parameter(description = "전화번호") @RequestParam String phone,
-            @Parameter(description = "예약 비밀번호") @RequestParam String password) {
-        List<ReservationDetailResponse> results = reservationService.searchMyReservations(name, phone, password);
+            @Parameter(description = "전화번호") @RequestParam String phone) {
+        List<ReservationDetailResponse> results = reservationService.searchMyReservations(name, phone);
         return ResponseEntity.ok(results);
     }
 
-    @Operation(summary = "예약 취소", description = "예약을 취소합니다")
-    @DeleteMapping("/{reservationId}")
+    @Operation(summary = "예약 취소", description = "예약 코드로 예약을 취소합니다")
+    @DeleteMapping("/{reservationCode}")
     public ResponseEntity<Void> cancelReservation(
-            @Parameter(description = "예약 ID") @PathVariable Long reservationId) {
-        reservationService.cancelReservation(reservationId);
+            @Parameter(description = "예약 코드") @PathVariable String reservationCode) {
+        reservationService.cancelReservation(reservationCode);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "클래스 코드로 조회", description = "클래스 코드로 클래스 정보를 조회합니다 (공개용)")
+    @Operation(summary = "클래스 코드로 클래스 정보 조회", description = "클래스 코드로 클래스 정보를 조회합니다 (공개용)")
     @GetMapping("/code/{classCode}")
     public ResponseEntity<OnedayClassResponse> getClassByCode(
             @Parameter(description = "클래스 코드") @PathVariable String classCode) {
         return ResponseEntity.ok(onedayClassService.getClassByCode(classCode));
+    }
+
+    @Operation(summary = "클래스 코드로 예약 조회", description = "클래스 코드로 해당 클래스의 모든 예약을 조회합니다")
+    @GetMapping("/code/{classCode}/reservations")
+    public ResponseEntity<List<ReservationDetailResponse>> getReservationsByClassCode(
+            @Parameter(description = "클래스 코드") @PathVariable String classCode) {
+        List<ReservationDetailResponse> results = reservationService.searchReservationsByClassCode(classCode);
+        return ResponseEntity.ok(results);
     }
 
     @Operation(summary = "클래스의 세션 목록 조회", description = "클래스 ID로 세션 목록을 조회합니다 (공개용, 지난 날짜 제외)")
@@ -88,8 +95,7 @@ public class ReservationController {
     public ResponseEntity<List<SessionResponse>> getClassSessions(
             @Parameter(description = "클래스 ID") @PathVariable Long classId) {
         return ResponseEntity.ok(
-                sessionService.getUpcomingSessionsByClassId(classId)
-        );
+                sessionService.getUpcomingSessionsByClassId(classId));
     }
 
 }
