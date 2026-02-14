@@ -22,18 +22,14 @@ public class Member {
     private String name;
 
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
     private String phone;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public Member(String loginId, String password, String name, String email, String phone) {
+    public Member(String name, String phone) {
         this.name = name;
-        this.password = password;
         this.phone = phone;
         this.createdAt = LocalDateTime.now();
     }

@@ -28,7 +28,4 @@ public class ReservationRequest {
     @Pattern(regexp = "^\\d{2,3}-\\d{3,4}-\\d{4}$", message = "올바른 전화번호 형식이어야 합니다. (예: 010-1234-5678)")
     private String phoneNumber;
 
-    @Schema(description = "예약 비밀번호", example = "1234")
-    @NotBlank(message = "비밀번호는 필수입니다.")
-    private String password;
 }

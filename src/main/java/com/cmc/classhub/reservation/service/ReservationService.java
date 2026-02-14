@@ -30,7 +30,7 @@ public class ReservationService {
         private final OnedayClassRepository onedayClassRepository;
         private final com.cmc.classhub.message.service.MessageService messageService;
 
-        public Long createReservation(ReservationRequest request, Long onedayClassId) {
+        public String createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
                 Member member = memberRepository
                                 .findByNameAndPhone(request.getApplicantName(), request.getPhoneNumber())
@@ -57,18 +57,19 @@ public class ReservationService {
                 // 6. 예약 생성 (상태: PENDING)
                 Reservation reservation = Reservation.apply(session.getId(), member);
 
-                Long reservationId = reservationRepository.save(reservation).getId();
+                Reservation savedReservation = reservationRepository.save(reservation);
+                String reservationCode = savedReservation.getReservationCode();
 
                 // 7. 예약 확정 알림톡 발송
                 try {
                         messageService.send(com.cmc.classhub.message.domain.MessageTemplateType.APPLY_CONFIRMED,
-                                        reservationId);
+                                        savedReservation.getId());
                 } catch (Exception e) {
                         // 알림톡 발송 실패가 예약 프로세스를 방해하면 안 됨
                         e.printStackTrace();
                 }
 
-                return reservationId;
+                return reservationCode;
         }
 
         @Transactional(readOnly = true)
@@ -98,8 +99,8 @@ public class ReservationService {
         }
 
         @Transactional(readOnly = true)
-        public ReservationDetailResponse getReservationDetails(Long reservationId) {
-                Reservation reservation = reservationRepository.findById(reservationId)
+        public ReservationDetailResponse getReservationDetails(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
                                 .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
 
                 Member member = memberRepository.findById(reservation.getMember().getId())
@@ -131,13 +132,13 @@ public class ReservationService {
         }
 
         @Transactional(readOnly = true)
-        public List<ReservationDetailResponse> searchMyReservations(String name, String phone, String password) {
+        public List<ReservationDetailResponse> searchMyReservations(String name, String phone) {
                 // 1. 회원 찾기
                 Member member = memberRepository.findByNameAndPhone(name, phone)
                                 .orElse(null);
 
-                // 2. 회원 없거나 비밀번호 틀리면 빈 리스트 반환
-                if (member == null || !member.getPassword().equals(password)) {
+                // 2. 회원이 없으면 빈 리스트 반환
+                if (member == null) {
                         return Collections.emptyList();
                 }
 
@@ -175,8 +176,61 @@ public class ReservationService {
                 }).filter(Objects::nonNull).collect(Collectors.toList());
         }
 
-        public void cancelReservation(Long reservationId) {
-                Reservation reservation = reservationRepository.findById(reservationId)
+        @Transactional(readOnly = true)
+        public List<ReservationDetailResponse> searchReservationsByClassCode(String classCode) {
+                // 1. 클래스 찾기
+                OnedayClass onedayClass = onedayClassRepository.findByClassCode(classCode)
+                                .orElse(null);
+
+                // 2. 클래스가 없으면 빈 리스트 반환
+                if (onedayClass == null) {
+                        return Collections.emptyList();
+                }
+
+                // 3. 해당 클래스의 모든 세션 ID 수집
+                List<Long> sessionIds = onedayClass.getSessions().stream()
+                                .map(Session::getId)
+                                .collect(Collectors.toList());
+
+                // 4. 모든 세션의 예약 목록 조회
+                List<Reservation> reservations = reservationRepository.findAll().stream()
+                                .filter(r -> sessionIds.contains(r.getSessionId()))
+                                .sorted((a, b) -> b.getId().compareTo(a.getId())) // 최신순 정렬
+                                .toList();
+
+                // 5. 상세 정보로 변환
+                return reservations.stream().map(reservation -> {
+                        try {
+                                Member member = memberRepository.findById(reservation.getMember().getId())
+                                                .orElseThrow();
+                                Session session = onedayClass.getSessions().stream()
+                                                .filter(s -> s.getId().equals(reservation.getSessionId()))
+                                                .findFirst()
+                                                .orElseThrow();
+
+                                return ReservationDetailResponse.builder()
+                                                .reservationId(reservation.getId())
+                                                .classTitle(onedayClass.getTitle())
+                                                .classLocation(onedayClass.getLocation())
+                                                .classCode(onedayClass.getClassCode())
+                                                .date(session.getDate())
+                                                .startTime(session.getStartTime())
+                                                .endTime(session.getEndTime())
+                                                .applicantName(member.getName())
+                                                .phoneNumber(member.getPhone())
+                                                .capacity(session.getCapacity())
+                                                .currentNum(session.getCurrentNum())
+                                                .sessionStatus(session.getStatus().name())
+                                                .reservationStatus(reservation.getStatus().name())
+                                                .build();
+                        } catch (Exception e) {
+                                return null;
+                        }
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+
+        public void cancelReservation(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
                                 .orElseThrow();
 
                 // 1. 세션 조회
@@ -206,7 +260,6 @@ public class ReservationService {
         private Member createGuestMember(ReservationRequest request) {
                 Member guestMember = Member.builder()
                                 .name(request.getApplicantName())
-                                .password(request.getPassword())
                                 .phone(request.getPhoneNumber())
                                 .build();
                 return memberRepository.save(guestMember);
