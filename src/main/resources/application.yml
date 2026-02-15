@@ -10,6 +10,5 @@ logging:
   level:
     root: INFO
     org.springframework: WARN
-    org.springframework.web: DEBUG
     org.apache: WARN
     org.hibernate: WARN
