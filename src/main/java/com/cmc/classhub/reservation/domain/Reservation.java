@@ -50,7 +50,7 @@ public class Reservation {
         this.sessionId = sessionId;
         this.member = member;
         this.reservationCode = java.util.UUID.randomUUID().toString();
-        this.status = ReservationStatus.CONFIRMED;
+        this.status = ReservationStatus.PENDING;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -60,6 +60,15 @@ public class Reservation {
                 .sessionId(sessionId)
                 .member(member)
                 .build();
+    }
+
+    // 확정
+    public void confirm() {
+        if (this.status != ReservationStatus.PENDING) {
+            throw new IllegalStateException("대기 상태인 예약만 확정할 수 있습니다.");
+        }
+        this.status = ReservationStatus.CONFIRMED;
+        this.confirmedAt = LocalDateTime.now();
     }
 
     // 취소

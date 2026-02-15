@@ -10,8 +10,8 @@ spring:
       path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: create   # (create, update, none 등 선택 가능)
-    show-sql: true       # 콘솔에 SQL 출력
+      ddl-auto: create # (create, update, none 등 선택 가능)
+    show-sql: true # 콘솔에 SQL 출력
 
 message:
   kakao:
@@ -30,3 +30,8 @@ image:
 
 cors:
   allowed-origins: http://localhost:3000, http://localhost:3001, https://dashboard.classhub.site, https://apply.classhub.site
+
+nicepay:
+  client-id: S1_6eaa0db1afdc41f3becb770878d67d25
+  secret-key: e80d068e400649a6ada66777fa350d40
+  api-url: https://sandbox-api.nicepay.co.kr

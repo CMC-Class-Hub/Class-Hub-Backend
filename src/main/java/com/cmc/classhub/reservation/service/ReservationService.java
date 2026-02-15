@@ -5,6 +5,7 @@ import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
+import com.cmc.classhub.reservation.domain.ReservationStatus;
 import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
@@ -58,18 +59,53 @@ public class ReservationService {
                 Reservation reservation = Reservation.apply(session.getId(), member);
 
                 Reservation savedReservation = reservationRepository.save(reservation);
-                String reservationCode = savedReservation.getReservationCode();
+                return savedReservation.getReservationCode();
+        }
 
-                // 7. 예약 확정 알림톡 발송
+        /**
+         * 예약 확정 처리 (결제 성공 시 호출)
+         */
+        public void completeReservation(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
+                                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+                // 1. 상태를 CONFIRMED로 변경
+                reservation.confirm();
+
+                // 2. 예약 확정 알림톡 발송
                 try {
                         messageService.send(com.cmc.classhub.message.domain.MessageTemplateType.APPLY_CONFIRMED,
-                                        savedReservation.getId());
+                                        reservation.getId());
                 } catch (Exception e) {
                         // 알림톡 발송 실패가 예약 프로세스를 방해하면 안 됨
                         e.printStackTrace();
                 }
+        }
 
-                return reservationCode;
+        /**
+         * 예약 실패 처리 (결제 실패 시 호출)
+         */
+        public void failReservation(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
+                                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+                // 이미 취소된 경우 무시
+                if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+                        return;
+                }
+
+                // 1. 상태를 CANCELLED로 변경
+                reservation.cancel();
+
+                // 2. 세션 인원 원복
+                OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSessionId())
+                                .orElseThrow(() -> new IllegalArgumentException("클래스 정보를 찾을 수 없습니다."));
+                Session session = onedayClass.getSessions().stream()
+                                .filter(s -> s.getId().equals(reservation.getSessionId()))
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
+
+                session.cancel();
         }
 
         @Transactional(readOnly = true)
