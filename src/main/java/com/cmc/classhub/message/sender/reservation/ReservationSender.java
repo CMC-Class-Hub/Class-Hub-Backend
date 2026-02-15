@@ -74,7 +74,7 @@ public abstract class ReservationSender extends MessageSender {
                                                                 + reservation.getSessionId()));
 
                 // 2. 변수 생성 (자식 클래스에게 위임)
-                Map<String, String> variables = createVariables(member, onedayClass, session);
+                Map<String, String> variables = createVariables(reservation.getReservationCode(), member, onedayClass, session);
 
                 // 3. 발송 (부모 클래스의 공통 발송 로직 호출)
                 super.sendMessage(reservationId, DomainType.RESERVATION, member.getPhone(), variables);
@@ -83,7 +83,7 @@ public abstract class ReservationSender extends MessageSender {
         /**
          * [Abstract Method] 각 메시지 타입별로 필요한 변수를 생성
          */
-        protected abstract Map<String, String> createVariables(Member member, OnedayClass onedayClass, Session session);
+        protected abstract Map<String, String> createVariables(String reservationCode, Member member, OnedayClass onedayClass, Session session);
 
         /**
          * 중복 확인 메서드
