@@ -19,19 +19,30 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        long startTime = System.currentTimeMillis();
+        log.info("[REQUEST] {} {} | From: {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                getRequestSource(request));
 
-        try {
-            filterChain.doFilter(request, response);
-        } finally {
-            long duration = System.currentTimeMillis() - startTime;
+        filterChain.doFilter(request, response);
+    }
 
-            log.info("[{}] {} {} | {}ms | Origin: {}",
-                    response.getStatus(),
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    duration,
-                    request.getHeader("Origin"));
+    private String getRequestSource(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent != null && userAgent.contains("ELB-HealthChecker")) {
+            return "ELB";
         }
+
+        String origin = request.getHeader("Origin");
+        if (origin != null) {
+            return origin;
+        }
+
+        String referer = request.getHeader("Referer");
+        if (referer != null) {
+            return referer;
+        }
+
+        return request.getRemoteAddr();
     }
 }
