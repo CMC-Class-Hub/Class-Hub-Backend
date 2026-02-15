@@ -21,15 +21,17 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
         long startTime = System.currentTimeMillis();
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;
 
-        long duration = System.currentTimeMillis() - startTime;
-
-        log.info("[{}] {} {} | {}ms | Origin: {}",
-                response.getStatus(),
-                request.getMethod(),
-                request.getRequestURI(),
-                duration,
-                request.getHeader("Origin"));
+            log.info("[{}] {} {} | {}ms | Origin: {}",
+                    response.getStatus(),
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    duration,
+                    request.getHeader("Origin"));
+        }
     }
 }
