@@ -35,7 +35,7 @@ public class ApplyConfirmedSender extends ReservationSender {
     }
 
     @Override
-    protected Map<String, String> createVariables(Member member, OnedayClass onedayClass, Session session) {
+    protected Map<String, String> createVariables(String reservationCode, Member member, OnedayClass onedayClass, Session session) {
         Map<String, String> variables = new HashMap<>();
 
         variables.put("#{수강생명}", nullSafe(member.getName()));
@@ -43,7 +43,7 @@ public class ApplyConfirmedSender extends ReservationSender {
         variables.put("#{날짜}", session.getDate().format(DATE_FORMAT));
         variables.put("#{시간}", session.getStartTime().format(TIME_FORMAT));
         variables.put("#{장소}", nullSafe(onedayClass.getLocation()));
-        variables.put("#{클래스코드}", onedayClass.getClassCode());
+        variables.put("#{예약코드}", reservationCode);
 
         return variables;
     }
