@@ -14,6 +14,7 @@ import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
 import com.cmc.classhub.payment.repository.PaymentRepository;
 import com.cmc.classhub.payment.domain.PaymentStatus;
+import com.cmc.classhub.onedayClass.repository.SessionRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
@@ -35,6 +36,7 @@ public class ReservationService {
         private final OnedayClassRepository onedayClassRepository;
         private final com.cmc.classhub.message.service.MessageService messageService;
         private final PaymentRepository paymentRepository;
+        private final SessionRepository sessionRepository;
 
         public ReservationCreateResponse createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
@@ -42,15 +44,9 @@ public class ReservationService {
                                 .findByNameAndPhone(request.getApplicantName(), request.getPhoneNumber())
                                 .orElseGet(() -> createGuestMember(request));
 
-                // 2. 클래스 조회
-                OnedayClass onedayClass = onedayClassRepository.findById(onedayClassId)
-                                .orElseThrow();
-
-                // 3. 세션 조회 (클래스의 세션 목록에서)
-                Session session = onedayClass.getSessions().stream()
-                                .filter(s -> s.getId().equals(request.getSessionId()))
-                                .findFirst()
-                                .orElseThrow();
+                // 3. 세션 조회 (비관적 락 적용)
+                Session session = sessionRepository.findByIdWithLock(request.getSessionId())
+                                .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
 
                 // 4. 중복 예약 확인 (확정된 예약이 있는 경우에만 차단)
                 if (reservationRepository.existsBySessionIdAndMemberAndStatus(session.getId(), member,
@@ -115,12 +111,8 @@ public class ReservationService {
                 // 1. 상태를 CANCELLED로 변경
                 reservation.cancel();
 
-                // 2. 세션 인원 원복
-                OnedayClass onedayClass = onedayClassRepository.findBySessionsId(reservation.getSessionId())
-                                .orElseThrow(() -> new IllegalArgumentException("클래스 정보를 찾을 수 없습니다."));
-                Session session = onedayClass.getSessions().stream()
-                                .filter(s -> s.getId().equals(reservation.getSessionId()))
-                                .findFirst()
+                // 2. 세션 인원 원복 (비관적 락 적용)
+                Session session = sessionRepository.findByIdWithLock(reservation.getSessionId())
                                 .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
 
                 session.cancel();
