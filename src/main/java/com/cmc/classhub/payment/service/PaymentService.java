@@ -93,33 +93,42 @@ public class PaymentService {
     }
 
     if ("0000".equals(resultCode)) {
-      // 금액 검증 (선택적이지만 권장)
-      if (amount != null && !amount.isEmpty()) {
-        try {
+      try {
+        // 금액 검증
+        if (amount != null && !amount.isEmpty()) {
           int requestAmount = Integer.parseInt(amount);
           if (requestAmount != payment.getAmount()) {
-            payment.fail("AMOUNT_MISMATCH", "결제 금액 불일치: 요청(" + requestAmount + "), DB(" + payment.getAmount() + ")");
-            // 예약 실패 처리 (인원 복구 등)
+            // PG 승인은 되었으나 금액이 불일치하는 경우 -> 즉시 취소 처리 (보상 트랜잭션)
+            String reason = "결제 금액 불일치: 요청(" + requestAmount + "), DB(" + payment.getAmount() + ")";
+            sendCancelRequestToNicepay(tid, requestAmount, reason);
+
+            payment.fail("AMOUNT_MISMATCH", reason);
             reservationService.failReservation(payment.getReservation().getReservationCode());
             return PaymentResponse.from(payment);
           }
-        } catch (NumberFormatException e) {
-          // 숫자 형식이 아니면 무시하거나 에러 처리
         }
+
+        // 1. 우리 DB에 승인 정보 기록
+        payment.approve(tid, resultCode, resultMsg);
+        payment.updatePaymentInfo(payMethod, cardCode, cardName, cardNum);
+
+        // 2. 예약 확정 처리
+        reservationService.completeReservation(payment.getReservation().getReservationCode());
+
+      } catch (Exception e) {
+        // 보상 트랜잭션: 우리 서버 처리 중 예외 발생 시 나이스페이 결제 취소 호출
+        System.err.println("내부 처리 중 오류 발생, 결제 자동 취소 진행: " + e.getMessage());
+        try {
+          int cancelAmount = (amount != null && !amount.isEmpty()) ? Integer.parseInt(amount) : payment.getAmount();
+          sendCancelRequestToNicepay(tid, cancelAmount, "시스템 오류: " + e.getMessage());
+        } catch (Exception cancelEx) {
+          System.err.println("보상 트랜잭션(자동 취소) 실패: " + cancelEx.getMessage());
+        }
+        throw e; // 트랜잭션 롤백
       }
-
-      // 나이스페이 결제 방식에 따라 결제와 승인이 한 번에 완료되므로 바로 승인 처리
-      payment.approve(tid, resultCode, resultMsg);
-      payment.updatePaymentInfo(payMethod, cardCode, cardName, cardNum);
-
-      // 예약 확정 처리
-      reservationService.completeReservation(payment.getReservation().getReservationCode());
-
     } else {
       // 결제창 이탈 또는 사용자 취소 등
       payment.fail(resultCode, resultMsg);
-
-      // 예약 실패 처리 (인원 복구 등)
       reservationService.failReservation(payment.getReservation().getReservationCode());
     }
 
@@ -130,7 +139,7 @@ public class PaymentService {
    * 결제 취소
    */
   @Transactional
-  public PaymentResponse cancelPayment(PaymentCancelRequest request) throws Exception {
+  public PaymentResponse cancelPayment(PaymentCancelRequest request) {
     Payment payment = paymentRepository.findByTid(request.getTid())
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 결제입니다."));
 
@@ -139,44 +148,60 @@ public class PaymentService {
     }
 
     // Nicepay API 호출하여 결제 취소
-    HttpHeaders headers = new HttpHeaders();
-    String auth = CLIENT_ID + ":" + SECRET_KEY;
-    String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
-    headers.set("Authorization", "Basic " + encodedAuth);
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    Map<String, Object> cancelMap = new HashMap<>();
-    cancelMap.put("amount", request.getAmount() != null ? request.getAmount() : payment.getAmount());
-    cancelMap.put("reason", request.getReason() != null ? request.getReason() : "사용자 요청");
-    cancelMap.put("orderId", UUID.randomUUID().toString());
-
-    HttpEntity<String> httpRequest = new HttpEntity<>(objectMapper.writeValueAsString(cancelMap), headers);
-
-    ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(
-        API_URL + "/v1/payments/" + request.getTid() + "/cancel",
-        httpRequest,
-        JsonNode.class);
-
-    JsonNode responseNode = responseEntity.getBody();
-    if (responseNode == null) {
-      throw new RuntimeException("결제 취소 API 응답이 없습니다.");
-    }
-    String resultCode = responseNode.get("resultCode").asText();
-    String resultMsg = responseNode.get("resultMsg").asText();
+    String resultCode = sendCancelRequestToNicepay(request.getTid(),
+        request.getAmount() != null ? request.getAmount() : payment.getAmount(),
+        request.getReason() != null ? request.getReason() : "사용자 요청");
 
     if ("0000".equals(resultCode)) {
       // 취소 성공
-      payment.cancel(resultMsg);
-
-      // 연관된 예약도 취소 처리 (결제 취소 시 인원 복구가 필요하므로 failReservation 로직 재사용 가능)
-      // 또는 별도의 취소 로직 호출
+      payment.cancel(request.getReason());
       reservationService.failReservation(payment.getReservation().getReservationCode());
     } else {
       // 취소 실패
-      throw new RuntimeException("결제 취소 실패: " + resultMsg);
+      throw new RuntimeException("결제 취소 API 호출 실패 (resultCode: " + resultCode + ")");
     }
 
     return PaymentResponse.from(payment);
+  }
+
+  /**
+   * Nicepay 결제 취소 API 호출 helper (실제 API 통신만 담당)
+   * 
+   * @return Nicepay 응답의 resultCode
+   */
+  private String sendCancelRequestToNicepay(String tid, int amount, String reason) {
+    if (tid == null || tid.isEmpty()) {
+      return "9999"; // TID 없음
+    }
+
+    try {
+      HttpHeaders headers = new HttpHeaders();
+      String auth = CLIENT_ID + ":" + SECRET_KEY;
+      String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+      headers.set("Authorization", "Basic " + encodedAuth);
+      headers.setContentType(MediaType.APPLICATION_JSON);
+
+      Map<String, Object> cancelMap = new HashMap<>();
+      cancelMap.put("amount", amount);
+      cancelMap.put("reason", reason);
+      cancelMap.put("orderId", UUID.randomUUID().toString());
+
+      HttpEntity<String> httpRequest = new HttpEntity<>(objectMapper.writeValueAsString(cancelMap), headers);
+
+      ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(
+          API_URL + "/v1/payments/" + tid + "/cancel",
+          httpRequest,
+          JsonNode.class);
+
+      JsonNode responseNode = responseEntity.getBody();
+      if (responseNode == null) {
+        throw new RuntimeException("결제 취소 API 응답이 없습니다.");
+      }
+
+      return responseNode.get("resultCode").asText();
+    } catch (Exception e) {
+      throw new RuntimeException("결제 취소 API 호출 중 서버 오류 발생: " + e.getMessage(), e);
+    }
   }
 
   /**
