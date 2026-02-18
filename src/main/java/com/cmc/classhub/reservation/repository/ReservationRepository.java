@@ -29,4 +29,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT r FROM Reservation r WHERE r.sessionId IN :sessionIds")
     List<Reservation> findAllBySessionIdIn(@Param("sessionIds") List<Long> sessionIds);
+
+    // 만료된 대기 예약 조회 (15분 경과)
+    List<Reservation> findByStatusAndCreatedAtBefore(ReservationStatus status, java.time.LocalDateTime dateTime);
 }

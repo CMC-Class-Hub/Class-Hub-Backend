@@ -12,6 +12,9 @@ import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
 import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
+import com.cmc.classhub.payment.repository.PaymentRepository;
+import com.cmc.classhub.payment.domain.PaymentStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -31,6 +34,7 @@ public class ReservationService {
         private final MemberRepository memberRepository;
         private final OnedayClassRepository onedayClassRepository;
         private final com.cmc.classhub.message.service.MessageService messageService;
+        private final PaymentRepository paymentRepository;
 
         public ReservationCreateResponse createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
@@ -109,6 +113,30 @@ public class ReservationService {
                                 .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
 
                 session.cancel();
+        }
+
+        /**
+         * 15분 동안 결제가 완료되지 않은 PENDING 예약을 자동으로 취소 처리
+         */
+        @Scheduled(fixedRate = 60000) // 1분마다 실행
+        @Transactional
+        public void expirePendingReservations() {
+                LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(15);
+                List<Reservation> expiredReservations = reservationRepository.findByStatusAndCreatedAtBefore(
+                                ReservationStatus.PENDING, expiryTime);
+
+                for (Reservation reservation : expiredReservations) {
+                        // 1. 예약 취소 및 인원 원복 처리
+                        failReservation(reservation.getReservationCode());
+
+                        // 2. 연관된 결제 정보가 있다면 실패 처리
+                        paymentRepository.findByReservationId(reservation.getId())
+                                        .ifPresent(payment -> {
+                                                if (payment.getStatus() == PaymentStatus.PENDING) {
+                                                        payment.fail("TIMEOUT", "결제 시간 초과(15분)");
+                                                }
+                                        });
+                }
         }
 
         @Transactional(readOnly = true)
