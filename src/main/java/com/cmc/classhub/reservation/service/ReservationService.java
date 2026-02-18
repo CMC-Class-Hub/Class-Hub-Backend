@@ -54,6 +54,13 @@ public class ReservationService {
                         throw new IllegalStateException("이미 확정된 예약이 있는 일정입니다.");
                 }
 
+                // 기존 PENDING 예약이 있다면 모두 취소 처리 (인원 원복 포함)
+                List<Reservation> existingPendings = reservationRepository.findBySessionIdAndMemberAndStatus(
+                                session.getId(), member, ReservationStatus.PENDING);
+                for (Reservation pending : existingPendings) {
+                        failReservation(pending.getReservationCode());
+                }
+
                 // 5. 세션 예약 처리 (정원 체크 포함)
                 session.join();
 
@@ -76,17 +83,7 @@ public class ReservationService {
                 // 1. 상태를 CONFIRMED로 변경
                 reservation.confirm();
 
-                // 2. 동일한 세션에 대해 해당 사용자의 다른 PENDING 예약이 있다면 모두 취소 처리 (인원 원복 포함)
-                List<Reservation> duplicates = reservationRepository.findBySessionIdAndMemberAndStatus(
-                                reservation.getSessionId(), reservation.getMember(), ReservationStatus.PENDING);
-
-                for (Reservation duplicate : duplicates) {
-                        if (!duplicate.getReservationCode().equals(reservationCode)) {
-                                failReservation(duplicate.getReservationCode());
-                        }
-                }
-
-                // 3. 예약 확정 알림톡 발송
+                // 2. 예약 확정 알림톡 발송
                 try {
                         messageService.send(com.cmc.classhub.message.domain.MessageTemplateType.APPLY_CONFIRMED,
                                         reservation.getId());
