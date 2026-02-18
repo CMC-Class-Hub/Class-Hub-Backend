@@ -80,7 +80,17 @@ public class ReservationService {
                 // 1. 상태를 CONFIRMED로 변경
                 reservation.confirm();
 
-                // 2. 예약 확정 알림톡 발송
+                // 2. 동일한 세션에 대해 해당 사용자의 다른 PENDING 예약이 있다면 모두 취소 처리 (인원 원복 포함)
+                List<Reservation> duplicates = reservationRepository.findBySessionIdAndMemberAndStatus(
+                                reservation.getSessionId(), reservation.getMember(), ReservationStatus.PENDING);
+
+                for (Reservation duplicate : duplicates) {
+                        if (!duplicate.getReservationCode().equals(reservationCode)) {
+                                failReservation(duplicate.getReservationCode());
+                        }
+                }
+
+                // 3. 예약 확정 알림톡 발송
                 try {
                         messageService.send(com.cmc.classhub.message.domain.MessageTemplateType.APPLY_CONFIRMED,
                                         reservation.getId());
@@ -145,7 +155,7 @@ public class ReservationService {
                 // 1. 해당 세션의 모든 예약 조회
                 List<Reservation> reservations = reservationRepository.findAllBySessionId(sessionId);
 
-                // 2. 예약 정보 + 회원 정보 매핑하여 반환
+                // 2. 예약 정보 + 회원 정보 매핑 후, 이름+전화번호 기준 최신 예약만 필터링
                 return reservations.stream()
                                 .map(reservation -> {
                                         Member member = memberRepository.findById(reservation.getMember().getId())
@@ -163,6 +173,14 @@ public class ReservationService {
                                                         .sentD1Notification(reservation.isSentD1Notification())
                                                         .build();
                                 })
+                                .sorted((r1, r2) -> r2.getAppliedAt().compareTo(r1.getAppliedAt())) // 최신순 정렬
+                                .collect(Collectors.toMap(
+                                                r -> r.getApplicantName() + r.getPhoneNumber(), // 중복체크 키
+                                                r -> r, // 값
+                                                (existing, replacement) -> existing // 이미 존재하면 기존값(최신) 유지
+                                ))
+                                .values().stream()
+                                .sorted((r1, r2) -> r2.getAppliedAt().compareTo(r1.getAppliedAt())) // 최종 결과 정렬 유지
                                 .collect(Collectors.toList());
         }
 
