@@ -17,7 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     java.util.Optional<Reservation> findByReservationCode(String reservationCode);
 
     // ID 기반 쿼리
-    boolean existsBySessionIdAndMember(Long sessionId, Member member);
+    boolean existsBySessionIdAndMemberAndStatus(Long sessionId, Member member, ReservationStatus status);
 
     // ID 기반 쿼리도 제공 (호환성)
     @Query("SELECT r FROM Reservation r WHERE r.sessionId = :sessionId")

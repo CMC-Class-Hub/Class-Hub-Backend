@@ -52,9 +52,10 @@ public class ReservationService {
                                 .findFirst()
                                 .orElseThrow();
 
-                // 4. 중복 예약 확인
-                if (reservationRepository.existsBySessionIdAndMember(session.getId(), member)) {
-                        throw new IllegalStateException("이미 해당 일정에 예약하셨습니다.");
+                // 4. 중복 예약 확인 (확정된 예약이 있는 경우에만 차단)
+                if (reservationRepository.existsBySessionIdAndMemberAndStatus(session.getId(), member,
+                                ReservationStatus.CONFIRMED)) {
+                        throw new IllegalStateException("이미 확정된 예약이 있는 일정입니다.");
                 }
 
                 // 5. 세션 예약 처리 (정원 체크 포함)
