@@ -141,10 +141,10 @@ public class ReservationService {
 
         @Transactional(readOnly = true)
         public List<ReservationResponse> getReservationsBySession(Long sessionId) {
-                // 1. 해당 세션의 모든 예약 조회
-                List<Reservation> reservations = reservationRepository.findAllBySessionId(sessionId);
+                // 1. DB 쿼리를 통해 이름+전화번호 기준 최신 예약만 조회
+                List<Reservation> reservations = reservationRepository.findLatestReservationsBySession(sessionId);
 
-                // 2. 예약 정보 + 회원 정보 매핑 후, 이름+전화번호 기준 최신 예약만 필터링
+                // 2. 예약 정보 + 회원 정보 매핑하여 반환
                 return reservations.stream()
                                 .map(reservation -> {
                                         Member member = memberRepository.findById(reservation.getMember().getId())
@@ -162,14 +162,6 @@ public class ReservationService {
                                                         .sentD1Notification(reservation.isSentD1Notification())
                                                         .build();
                                 })
-                                .sorted((r1, r2) -> r2.getAppliedAt().compareTo(r1.getAppliedAt())) // 최신순 정렬
-                                .collect(Collectors.toMap(
-                                                r -> r.getApplicantName() + r.getPhoneNumber(), // 중복체크 키
-                                                r -> r, // 값
-                                                (existing, replacement) -> existing // 이미 존재하면 기존값(최신) 유지
-                                ))
-                                .values().stream()
-                                .sorted((r1, r2) -> r2.getAppliedAt().compareTo(r1.getAppliedAt())) // 최종 결과 정렬 유지
                                 .collect(Collectors.toList());
         }
 
@@ -217,10 +209,7 @@ public class ReservationService {
                         return Collections.emptyList();
                 }
 
-                List<Reservation> myReservations = reservationRepository.findAll().stream()
-                                .filter(r -> r.getMember().getId().equals(member.getId()))
-                                .sorted((a, b) -> b.getId().compareTo(a.getId())) // 최신순 정렬
-                                .toList();
+                List<Reservation> myReservations = reservationRepository.findByMemberIdOrderByIdDesc(member.getId());
 
                 // 3. 상세 정보로 변환
                 return myReservations.stream().map(reservation -> {
@@ -267,11 +256,8 @@ public class ReservationService {
                                 .map(Session::getId)
                                 .collect(Collectors.toList());
 
-                // 4. 모든 세션의 예약 목록 조회
-                List<Reservation> reservations = reservationRepository.findAll().stream()
-                                .filter(r -> sessionIds.contains(r.getSessionId()))
-                                .sorted((a, b) -> b.getId().compareTo(a.getId())) // 최신순 정렬
-                                .toList();
+                // 4. 모든 세션의 예약 목록 조회 (최신순)
+                List<Reservation> reservations = reservationRepository.findBySessionIdInOrderByIdDesc(sessionIds);
 
                 // 5. 상세 정보로 변환
                 return reservations.stream().map(reservation -> {
