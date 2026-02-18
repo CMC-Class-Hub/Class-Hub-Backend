@@ -47,3 +47,6 @@ springdoc:
 
 server:
   forward-headers-strategy: native
+
+frontend:
+  url: ${FRONTEND_URL:https://apply.classhub.site}

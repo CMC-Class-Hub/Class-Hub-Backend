@@ -35,3 +35,6 @@ nicepay:
   client-id: S1_6eaa0db1afdc41f3becb770878d67d25
   secret-key: e80d068e400649a6ada66777fa350d40
   api-url: https://sandbox-api.nicepay.co.kr
+
+frontend:
+  url: http://localhost:3001

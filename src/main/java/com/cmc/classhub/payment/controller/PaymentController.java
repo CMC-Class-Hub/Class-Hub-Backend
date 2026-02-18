@@ -27,7 +27,7 @@ public class PaymentController {
 
   private final PaymentService paymentService;
 
-  @Value("${frontend.url:http://localhost:3000}")
+  @Value("${frontend.url}")
   private String frontendUrl;
 
   /**
