@@ -1,11 +1,14 @@
-package com.cmc.classhub.reservation.service;
+package com.cmc.classhub.payment.service;
 
+import com.cmc.classhub.payment.domain.Payment;
+import com.cmc.classhub.payment.domain.PaymentStatus;
+import com.cmc.classhub.payment.dto.PaymentCancelRequest;
+import com.cmc.classhub.payment.dto.PaymentRequest;
+import com.cmc.classhub.payment.dto.PaymentResponse;
+import com.cmc.classhub.payment.repository.PaymentRepository;
 import com.cmc.classhub.reservation.domain.*;
-import com.cmc.classhub.reservation.dto.PaymentCancelRequest;
-import com.cmc.classhub.reservation.dto.PaymentRequest;
-import com.cmc.classhub.reservation.dto.PaymentResponse;
-import com.cmc.classhub.reservation.repository.PaymentRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
+import com.cmc.classhub.reservation.service.ReservationService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -96,6 +99,8 @@ public class PaymentService {
           int requestAmount = Integer.parseInt(amount);
           if (requestAmount != payment.getAmount()) {
             payment.fail("AMOUNT_MISMATCH", "결제 금액 불일치: 요청(" + requestAmount + "), DB(" + payment.getAmount() + ")");
+            // 예약 실패 처리 (인원 복구 등)
+            reservationService.failReservation(payment.getReservation().getReservationCode());
             return PaymentResponse.from(payment);
           }
         } catch (NumberFormatException e) {

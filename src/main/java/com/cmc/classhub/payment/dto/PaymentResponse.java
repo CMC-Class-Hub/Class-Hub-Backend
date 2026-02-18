@@ -1,11 +1,12 @@
-package com.cmc.classhub.reservation.dto;
+package com.cmc.classhub.payment.dto;
 
-import com.cmc.classhub.reservation.domain.Payment;
-import com.cmc.classhub.reservation.domain.PaymentStatus;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+
+import com.cmc.classhub.payment.domain.Payment;
+import com.cmc.classhub.payment.domain.PaymentStatus;
 
 @Getter
 @Builder

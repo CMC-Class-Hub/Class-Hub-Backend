@@ -1,4 +1,4 @@
-package com.cmc.classhub.reservation.domain;
+package com.cmc.classhub.payment.domain;
 
 public enum PaymentStatus {
   PENDING, // 결제 대기

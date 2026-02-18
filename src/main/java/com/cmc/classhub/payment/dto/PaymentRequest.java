@@ -1,4 +1,4 @@
-package com.cmc.classhub.reservation.dto;
+package com.cmc.classhub.payment.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

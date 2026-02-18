@@ -8,6 +8,7 @@ import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
 import com.cmc.classhub.reservation.service.ReservationService;
+import com.cmc.classhub.reservation.dto.ReservationCreateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,10 +36,10 @@ public class ReservationController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @PostMapping
-    public ResponseEntity<String> reserve(
+    public ResponseEntity<ReservationCreateResponse> reserve(
             @Parameter(description = "클래스 ID") @RequestParam Long onedayClassId,
             @RequestBody @Valid ReservationRequest request) {
-        String reservationCode = reservationService.createReservation(request, onedayClassId);
+        ReservationCreateResponse reservationCode = reservationService.createReservation(request, onedayClassId);
         return ResponseEntity.ok(reservationCode);
     }
 

@@ -1,11 +1,12 @@
-package com.cmc.classhub.reservation.repository;
+package com.cmc.classhub.payment.repository;
 
-import com.cmc.classhub.reservation.domain.Payment;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import com.cmc.classhub.payment.domain.Payment;
 
 import java.util.Optional;
 

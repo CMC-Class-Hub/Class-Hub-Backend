@@ -1,4 +1,4 @@
-package com.cmc.classhub.reservation.dto;
+package com.cmc.classhub.payment.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

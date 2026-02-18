@@ -1,9 +1,10 @@
-package com.cmc.classhub.reservation.controller;
+package com.cmc.classhub.payment.controller;
 
-import com.cmc.classhub.reservation.dto.PaymentCancelRequest;
-import com.cmc.classhub.reservation.dto.PaymentRequest;
-import com.cmc.classhub.reservation.dto.PaymentResponse;
-import com.cmc.classhub.reservation.service.PaymentService;
+import com.cmc.classhub.payment.dto.PaymentCancelRequest;
+import com.cmc.classhub.payment.dto.PaymentRequest;
+import com.cmc.classhub.payment.dto.PaymentResponse;
+import com.cmc.classhub.payment.service.PaymentService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.cmc.classhub.reservation.domain;
+package com.cmc.classhub.payment.domain;
 
 public enum PaymentMethod {
   CARD, // 신용카드

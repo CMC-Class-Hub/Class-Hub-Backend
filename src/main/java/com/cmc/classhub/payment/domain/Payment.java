@@ -1,4 +1,4 @@
-package com.cmc.classhub.reservation.domain;
+package com.cmc.classhub.payment.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+import com.cmc.classhub.reservation.domain.Reservation;
 
 @Entity
 @Table(name = "payments")

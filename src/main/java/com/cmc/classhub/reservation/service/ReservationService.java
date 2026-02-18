@@ -6,6 +6,7 @@ import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
 import com.cmc.classhub.reservation.domain.ReservationStatus;
+import com.cmc.classhub.reservation.dto.ReservationCreateResponse;
 import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
@@ -31,7 +32,7 @@ public class ReservationService {
         private final OnedayClassRepository onedayClassRepository;
         private final com.cmc.classhub.message.service.MessageService messageService;
 
-        public String createReservation(ReservationRequest request, Long onedayClassId) {
+        public ReservationCreateResponse createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
                 Member member = memberRepository
                                 .findByNameAndPhone(request.getApplicantName(), request.getPhoneNumber())
@@ -59,7 +60,9 @@ public class ReservationService {
                 Reservation reservation = Reservation.apply(session.getId(), member);
 
                 Reservation savedReservation = reservationRepository.save(reservation);
-                return savedReservation.getReservationCode();
+                return ReservationCreateResponse.builder()
+                                .reservationCode(savedReservation.getReservationCode())
+                                .build();
         }
 
         /**
