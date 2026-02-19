@@ -5,6 +5,7 @@ import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
+import com.cmc.classhub.reservation.domain.ReservationStatus;
 import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
@@ -46,8 +47,8 @@ public class ReservationService {
                                 .findFirst()
                                 .orElseThrow();
 
-                // 4. 중복 예약 확인
-                if (reservationRepository.existsBySessionIdAndMember(session.getId(), member)) {
+                // 4. 중복 예약 확인 (취소된 예약은 제외)
+                if (reservationRepository.existsBySessionIdAndMemberAndStatusNot(session.getId(), member, ReservationStatus.CANCELLED)) {
                         throw new IllegalStateException("이미 해당 일정에 예약하셨습니다.");
                 }
 

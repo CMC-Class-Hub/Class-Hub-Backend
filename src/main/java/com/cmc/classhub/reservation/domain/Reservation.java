@@ -30,8 +30,7 @@ public class Reservation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ReservationStatus status;
-    // PENDING, CONFIRMED, CANCELLED, TIMEOUT, ATTENDED, NO_SHOW
+    private ReservationStatus status; // CONFIRMED, CANCELLED
 
     private LocalDateTime confirmedAt; // 확정 일시
     private LocalDateTime cancelledAt; // 취소 일시

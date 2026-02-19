@@ -6,9 +6,9 @@ spring:
   output:
     ansi:
       enabled: DETECT
-  logging:
-    level:
-      root: INFO
-      org.springframework: WARN
-      org.apache: WARN
-      org.hibernate: WARN
+logging:
+  level:
+    root: INFO
+    org.springframework: WARN
+    org.apache: WARN
+    org.hibernate: WARN
