@@ -35,10 +35,9 @@ public class ReminderD3Sender extends ReservationSender {
     }
 
     @Override
-    protected Map<String, String> createVariables(Member member, OnedayClass onedayClass, Session session) {
+    protected Map<String, String> createVariables(String reservationCode, Member member, OnedayClass onedayClass, Session session) {
         Map<String, String> variables = new HashMap<>();
 
-        // 공통 변수
         variables.put("#{수강생명}", nullSafe(member.getName()));
         variables.put("#{클래스명}", nullSafe(onedayClass.getTitle()));
         variables.put("#{날짜}", session.getDate().format(DATE_FORMAT));
@@ -46,7 +45,7 @@ public class ReminderD3Sender extends ReservationSender {
         variables.put("#{장소}", nullSafe(onedayClass.getLocation()));
         variables.put("#{준비물}", nullSafe(onedayClass.getMaterial()));
         variables.put("#{주차}", nullSafe(onedayClass.getParkingInfo()));
-        variables.put("#{클래스코드}", onedayClass.getClassCode());
+        variables.put("#{예약코드}", reservationCode);
 
         return variables;
     }
