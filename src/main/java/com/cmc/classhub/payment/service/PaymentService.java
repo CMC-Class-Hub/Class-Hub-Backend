@@ -9,6 +9,9 @@ import com.cmc.classhub.payment.repository.PaymentRepository;
 import com.cmc.classhub.reservation.domain.*;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
 import com.cmc.classhub.reservation.service.ReservationService;
+import com.cmc.classhub.onedayClass.domain.OnedayClass;
+import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
+import com.cmc.classhub.settlement.service.SettlementService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,8 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
   private final ReservationRepository reservationRepository;
   private final ReservationService reservationService;
+  private final SettlementService settlementService;
+  private final OnedayClassRepository onedayClassRepository;
   private final RestTemplate restTemplate = new RestTemplate();
   private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -115,6 +120,12 @@ public class PaymentService {
         // 2. 예약 확정 처리
         reservationService.completeReservation(payment.getReservation().getReservationCode());
 
+        // 3. 정산 데이터 생성
+        OnedayClass onedayClass = onedayClassRepository.findBySessionsId(payment.getReservation().getSessionId())
+            .orElseThrow(() -> new IllegalStateException("세션에 해당하는 클래스를 찾을 수 없습니다."));
+        settlementService.createSettlement(onedayClass.getInstructorId(), payment.getReservation().getId(),
+            payment.getAmount());
+
       } catch (Exception e) {
         // 보상 트랜잭션: 우리 서버 처리 중 예외 발생 시 나이스페이 결제 취소 호출
         System.err.println("내부 처리 중 오류 발생, 결제 자동 취소 진행: " + e.getMessage());
@@ -156,6 +167,9 @@ public class PaymentService {
       // 취소 성공
       payment.cancel(request.getReason());
       reservationService.failReservation(payment.getReservation().getReservationCode());
+
+      // 정산 데이터 취소 처리
+      settlementService.cancelSettlementByReservationId(payment.getReservation().getId());
     } else {
       // 취소 실패
       throw new RuntimeException("결제 취소 API 호출 실패 (resultCode: " + resultCode + ")");

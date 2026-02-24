@@ -32,8 +32,8 @@ cors:
   allowed-origins: http://localhost:3000, http://localhost:3001, https://dashboard.classhub.site, https://apply.classhub.site
 
 nicepay:
-  client-id: S1_6eaa0db1afdc41f3becb770878d67d25
-  secret-key: e80d068e400649a6ada66777fa350d40
+  client-id: S1_dfd812aa02c542dbac5edcd72a3b1eca	
+  secret-key: 0a9542864d2640959fb4df6a9e8899a2
   api-url: https://sandbox-api.nicepay.co.kr
 
 frontend:
