@@ -80,7 +80,7 @@ public class ReservationController {
     @GetMapping("/code/{classCode}")
     public ResponseEntity<OnedayClassResponse> getClassByCode(
             @Parameter(description = "클래스 코드") @PathVariable String classCode) {
-        return ResponseEntity.ok(onedayClassService.getClassByCode(classCode));
+        return ResponseEntity.ok(reservationService.getClassByCode(classCode));
     }
 
     @Operation(summary = "클래스 코드로 예약 조회", description = "클래스 코드로 해당 클래스의 모든 예약을 조회합니다")

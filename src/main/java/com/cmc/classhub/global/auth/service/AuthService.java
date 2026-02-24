@@ -36,6 +36,7 @@ public class AuthService {
                 .phoneNumber(req.phoneNumber())
                 .passwordHash(hash)
                 .role(Role.USER) // 회원가입 시 기본값은 일반 유저
+                .profileUrl(req.profileUrl())
                 .build();
         instructorRepository.save(instructor);
         return instructor.getId();
@@ -58,7 +59,8 @@ public class AuthService {
                 instructor.getId(),
                 instructor.getName(),
                 instructor.getPhoneNumber(),
-                instructor.getRole());
+                instructor.getRole(),
+                instructor.getProfileUrl());
         TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
 
         return new LoginResultDto(loginResponse, tokenDto);

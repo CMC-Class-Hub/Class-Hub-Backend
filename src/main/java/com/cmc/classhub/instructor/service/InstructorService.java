@@ -46,7 +46,7 @@ public class InstructorService {
         Instructor instructor = instructorRepository.findById(instructorId)
                 .orElseThrow(() -> new IllegalArgumentException("강사를 찾을 수 없습니다."));
 
-        instructor.updateInfo(request.name(), request.email(), request.phoneNumber());
+        instructor.updateInfo(request.name(), request.email(), request.phoneNumber(), request.profileUrl());
 
         if (request.password() != null && !request.password().isBlank()) {
             instructor.updatePassword(passwordEncoder.encode(request.password()));

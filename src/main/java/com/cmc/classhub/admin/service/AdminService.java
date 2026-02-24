@@ -34,7 +34,8 @@ public class AdminService {
               instructor.getCreatedAt(),
               classCount,
               sessionCount,
-              reservationCount);
+              reservationCount,
+              instructor.getProfileUrl());
         })
         .toList();
   }

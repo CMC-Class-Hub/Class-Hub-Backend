@@ -31,6 +31,9 @@ public class Instructor {
     @Column(nullable = false, length = 100)
     private String passwordHash;
 
+    @Column
+    private String profileUrl; // 프로필 이미지 URL
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -42,17 +45,19 @@ public class Instructor {
     private boolean isDeleted = false;
 
     @Builder
-    public Instructor(String name, String email, String phoneNumber, String passwordHash, Role role) {
+    public Instructor(String name, String email, String phoneNumber, String passwordHash, Role role,
+            String profileUrl) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.passwordHash = passwordHash;
         this.role = (role == null) ? Role.USER : role;
+        this.profileUrl = profileUrl;
         this.createdAt = LocalDateTime.now();
         this.isDeleted = false;
     }
 
-    public void updateInfo(String name, String email, String phoneNumber) {
+    public void updateInfo(String name, String email, String phoneNumber, String profileUrl) {
         if (name != null && !name.isBlank()) {
             this.name = name;
         }
@@ -62,6 +67,7 @@ public class Instructor {
         if (phoneNumber != null && !phoneNumber.isBlank()) {
             this.phoneNumber = phoneNumber;
         }
+        this.profileUrl = profileUrl;
     }
 
     public void updatePassword(String passwordHash) {

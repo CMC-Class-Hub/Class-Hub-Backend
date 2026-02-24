@@ -15,6 +15,9 @@ import com.cmc.classhub.reservation.repository.ReservationRepository;
 import com.cmc.classhub.payment.repository.PaymentRepository;
 import com.cmc.classhub.payment.domain.PaymentStatus;
 import com.cmc.classhub.onedayClass.repository.SessionRepository;
+import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
+import com.cmc.classhub.instructor.repository.InstructorRepository;
+import com.cmc.classhub.instructor.domain.Instructor;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
@@ -37,6 +40,7 @@ public class ReservationService {
         private final com.cmc.classhub.message.service.MessageService messageService;
         private final PaymentRepository paymentRepository;
         private final SessionRepository sessionRepository;
+        private final InstructorRepository instructorRepository;
 
         public ReservationCreateResponse createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
@@ -181,10 +185,15 @@ public class ReservationService {
                                 .findFirst()
                                 .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
 
+                String instructorProfileUrl = instructorRepository.findById(onedayClass.getInstructorId())
+                                .map(Instructor::getProfileUrl)
+                                .orElse(null);
+
                 return ReservationDetailResponse.builder()
                                 .reservationId(reservation.getId())
                                 .classTitle(onedayClass.getTitle())
                                 .classLocation(onedayClass.getLocation())
+                                .instructorProfileUrl(instructorProfileUrl)
                                 .classCode(onedayClass.getClassCode())
                                 .date(session.getDate())
                                 .startTime(session.getStartTime())
@@ -222,10 +231,16 @@ public class ReservationService {
                                                 .findFirst()
                                                 .orElseThrow();
 
+                                String instructorProfileUrl = instructorRepository
+                                                .findById(onedayClass.getInstructorId())
+                                                .map(Instructor::getProfileUrl)
+                                                .orElse(null);
+
                                 return ReservationDetailResponse.builder()
                                                 .reservationId(reservation.getId())
                                                 .classTitle(onedayClass.getTitle())
                                                 .classLocation(onedayClass.getLocation())
+                                                .instructorProfileUrl(instructorProfileUrl)
                                                 .date(session.getDate())
                                                 .startTime(session.getStartTime())
                                                 .endTime(session.getEndTime())
@@ -259,6 +274,10 @@ public class ReservationService {
                 // 4. 모든 세션의 예약 목록 조회 (최신순)
                 List<Reservation> reservations = reservationRepository.findBySessionIdInOrderByIdDesc(sessionIds);
 
+                String instructorProfileUrl = instructorRepository.findById(onedayClass.getInstructorId())
+                                .map(Instructor::getProfileUrl)
+                                .orElse(null);
+
                 // 5. 상세 정보로 변환
                 return reservations.stream().map(reservation -> {
                         try {
@@ -273,6 +292,7 @@ public class ReservationService {
                                                 .reservationId(reservation.getId())
                                                 .classTitle(onedayClass.getTitle())
                                                 .classLocation(onedayClass.getLocation())
+                                                .instructorProfileUrl(instructorProfileUrl)
                                                 .classCode(onedayClass.getClassCode())
                                                 .date(session.getDate())
                                                 .startTime(session.getStartTime())
@@ -326,4 +346,19 @@ public class ReservationService {
                 return memberRepository.save(guestMember);
         }
 
+        @Transactional(readOnly = true)
+        public OnedayClassResponse getClassByCode(String classCode) {
+                OnedayClass onedayClass = onedayClassRepository.findByClassCode(classCode)
+                                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스 코드입니다."));
+
+                if (onedayClass.isDeleted()) {
+                        throw new IllegalArgumentException("삭제된 클래스입니다.");
+                }
+
+                String profileUrl = instructorRepository.findById(onedayClass.getInstructorId())
+                                .map(Instructor::getProfileUrl)
+                                .orElse(null);
+
+                return OnedayClassResponse.from(onedayClass, profileUrl);
+        }
 }
