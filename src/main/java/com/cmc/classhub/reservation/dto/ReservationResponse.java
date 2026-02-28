@@ -30,6 +30,9 @@ public class ReservationResponse {
     @Schema(description = "예약 상태", example = "CONFIRMED")
     private String reservationStatus;
 
+    @Schema(description = "출석 상태", example = "READY")
+    private String attendanceStatus;
+
     @Schema(description = "D-3 알림 발송 여부", example = "false")
     private boolean sentD3Notification;
 
