@@ -52,4 +52,7 @@ public class ReservationDetailResponse {
 
     @Schema(description = "예약 상태", example = "CONFIRMED")
     private String reservationStatus;
+
+    @Schema(description = "출석 상태", example = "READY")
+    private String attendanceStatus;
 }

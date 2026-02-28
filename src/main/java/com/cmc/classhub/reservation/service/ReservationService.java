@@ -48,7 +48,8 @@ public class ReservationService {
                                 .orElseThrow();
 
                 // 4. 중복 예약 확인 (취소된 예약은 제외)
-                if (reservationRepository.existsBySessionIdAndMemberAndStatusNot(session.getId(), member, ReservationStatus.CANCELLED)) {
+                if (reservationRepository.existsBySessionIdAndMemberAndStatusNot(session.getId(), member,
+                                ReservationStatus.CANCELLED)) {
                         throw new IllegalStateException("이미 해당 일정에 예약하셨습니다.");
                 }
 
@@ -92,6 +93,7 @@ public class ReservationService {
                                                         .studentId(member.getId())
                                                         .appliedAt(reservation.getCreatedAt())
                                                         .reservationStatus(reservation.getStatus().name())
+                                                        .attendanceStatus(reservation.getAttendanceStatus().name())
                                                         .sentD3Notification(reservation.isSentD3Notification())
                                                         .sentD1Notification(reservation.isSentD1Notification())
                                                         .build();
@@ -129,6 +131,7 @@ public class ReservationService {
                                 .currentNum(session.getCurrentNum())
                                 .sessionStatus(session.getStatus().name())
                                 .reservationStatus(reservation.getStatus().name())
+                                .attendanceStatus(reservation.getAttendanceStatus().name())
                                 .build();
         }
 
@@ -170,6 +173,7 @@ public class ReservationService {
                                                 .phoneNumber(member.getPhone())
                                                 .sessionStatus(session.getStatus().name())
                                                 .reservationStatus(reservation.getStatus().name())
+                                                .attendanceStatus(reservation.getAttendanceStatus().name())
                                                 .build();
                         } catch (Exception e) {
                                 return null;
@@ -223,6 +227,7 @@ public class ReservationService {
                                                 .currentNum(session.getCurrentNum())
                                                 .sessionStatus(session.getStatus().name())
                                                 .reservationStatus(reservation.getStatus().name())
+                                                .attendanceStatus(reservation.getAttendanceStatus().name())
                                                 .build();
                         } catch (Exception e) {
                                 return null;
@@ -256,6 +261,12 @@ public class ReservationService {
                 session.cancel();
 
                 // Note: 예약 엔티티는 삭제하지 않고 이력 관리
+        }
+
+        public void markPresent(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
+                                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+                reservation.markPresent();
         }
 
         private Member createGuestMember(ReservationRequest request) {
