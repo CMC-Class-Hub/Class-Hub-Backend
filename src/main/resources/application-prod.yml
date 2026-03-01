@@ -50,3 +50,8 @@ server:
 
 frontend:
   url: ${FRONTEND_URL:https://apply.classhub.site}
+
+nicepay:
+  client-id: ${NICEPAY_CLIENT_ID}
+  secret-key: ${NICEPAY_SECRET_KEY}
+  api-url: ${NICEPAY_API_URL}
