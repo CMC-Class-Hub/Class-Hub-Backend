@@ -40,10 +40,10 @@ public class MessageScheduler {
         LocalDate d1Target = today.plusDays(1); // 1일 뒤 세션
 
         // D-3 리마인더
-        sendReminderForDate(d3Target, MessageTemplateType.REMINDER_D3);
+        sendReminderForDate(d3Target, MessageTemplateType.AUTO_REMINDER_D3);
 
         // D-1 리마인더
-        sendReminderForDate(d1Target, MessageTemplateType.REMINDER_D1);
+        sendReminderForDate(d1Target, MessageTemplateType.AUTO_REMINDER_D1);
 
         log.info("리마인더 발송 스케줄러 종료");
     }
@@ -98,9 +98,9 @@ public class MessageScheduler {
      * 알림 발송 완료 마킹
      */
     private void markNotificationSent(Reservation reservation, MessageTemplateType templateType) {
-        if (templateType == MessageTemplateType.REMINDER_D3) {
+        if (templateType == MessageTemplateType.AUTO_REMINDER_D3) {
             reservation.markD3NotificationSent();
-        } else if (templateType == MessageTemplateType.REMINDER_D1) {
+        } else if (templateType == MessageTemplateType.AUTO_REMINDER_D1) {
             reservation.markD1NotificationSent();
         }
         reservationRepository.save(reservation);

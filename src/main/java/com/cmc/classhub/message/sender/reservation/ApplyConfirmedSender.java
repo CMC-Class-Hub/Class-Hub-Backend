@@ -31,7 +31,7 @@ public class ApplyConfirmedSender extends ReservationSender {
 
     @Override
     public MessageTemplateType getSupportedType() {
-        return MessageTemplateType.APPLY_CONFIRMED;
+        return MessageTemplateType.AUTO_APPLY_CONFIRMED;
     }
 
     @Override
