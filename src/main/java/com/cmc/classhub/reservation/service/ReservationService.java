@@ -64,7 +64,7 @@ public class ReservationService {
 
                 // 7. 예약 확정 알림톡 발송
                 try {
-                        messageService.send(MessageTemplateType.AUTO_APPLY_CONFIRMED,
+                        messageService.sendAuto(MessageTemplateType.AUTO_APPLY_CONFIRMED,
                                         savedReservation.getId());
                 } catch (Exception e) {
                         // 알림톡 발송 실패가 예약 프로세스를 방해하면 안 됨

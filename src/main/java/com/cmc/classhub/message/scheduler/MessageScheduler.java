@@ -85,7 +85,7 @@ public class MessageScheduler {
         // 각 예약자에게 발송
         for (Reservation reservation : reservations) {
             try {
-                messageService.send(templateType, reservation.getId());
+                messageService.sendAuto(templateType, reservation.getId());
                 // 발송 성공 시 마킹
                 markNotificationSent(reservation, templateType);
             } catch (Exception e) {
