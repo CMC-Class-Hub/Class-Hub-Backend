@@ -1,5 +1,6 @@
 package com.cmc.classhub.reservation.service;
 
+import com.cmc.classhub.message.domain.MessageTemplateType;
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
@@ -64,7 +65,7 @@ public class ReservationService {
 
                 // 7. 예약 확정 알림톡 발송
                 try {
-                        messageService.send(com.cmc.classhub.message.domain.MessageTemplateType.APPLY_CONFIRMED,
+                        messageService.sendAuto(MessageTemplateType.AUTO_APPLY_CONFIRMED,
                                         savedReservation.getId());
                 } catch (Exception e) {
                         // 알림톡 발송 실패가 예약 프로세스를 방해하면 안 됨

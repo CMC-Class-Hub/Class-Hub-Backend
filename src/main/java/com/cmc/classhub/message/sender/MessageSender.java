@@ -37,11 +37,12 @@ public abstract class MessageSender {
     /**
      * 공통 발송 및 이력 저장 로직
      */
-    protected void sendMessage(Long rid, DomainType domainType, String receiver, Map<String, String> variables) {
-        MessageTemplateType type = getSupportedType();
+    protected void sendMessage(Long rid, DomainType domainType,
+                               String receiverName, String receiverPhone, Map<String, String> variables) {
+        MessageTemplateType templateType = getSupportedType();
 
         // 1. 발송
-        MessageSendResult result = messageClient.sendWithTemplate(receiver, type.getTemplateId(), variables);
+        MessageSendResult result = messageClient.sendWithTemplate(receiverPhone, templateType.getTemplateId(), variables);
 
         // 2. 이력 저장
         Message message;
@@ -49,19 +50,21 @@ public abstract class MessageSender {
             message = Message.sending(
                     domainType,
                     rid,
-                    type,
-                    receiver,
+                    templateType,
+                    receiverName,
+                    receiverPhone,
                     result.getProviderMessageId());
-            log.info("발송 성공: rid={}, type={}, msgId={}", rid, type, result.getProviderMessageId());
+            log.info("발송 성공: rid={}, type={}, msgId={}", rid, templateType, result.getProviderMessageId());
         } else {
             message = Message.fail(
                     domainType,
                     rid,
-                    type,
-                    receiver,
+                    templateType,
+                    receiverName,
+                    receiverPhone,
                     result.getErrorMessage(),
                     result.getFailCode());
-            log.warn("발송 실패: rid={}, type={}, error={}", rid, type, result.getErrorMessage());
+            log.warn("발송 실패: rid={}, type={}, error={}", rid, templateType, result.getErrorMessage());
         }
 
         messageRepository.save(message);

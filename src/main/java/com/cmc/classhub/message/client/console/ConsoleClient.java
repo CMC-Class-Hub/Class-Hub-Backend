@@ -25,4 +25,10 @@ public class ConsoleClient implements MessageClient {
 
         return MessageSendResult.ok(fakeId);
     }
+
+    @Override
+    public String getMessageText(String messageId) {
+        log.info("[ALIMTOK:CONSOLE] getMessageText: messageId={}", messageId);
+        return "[콘솔 테스트 메시지]";
+    }
 }

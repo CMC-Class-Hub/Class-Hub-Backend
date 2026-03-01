@@ -5,6 +5,8 @@ import com.cmc.classhub.message.client.MessageSendResult;
 import com.solapi.sdk.message.model.kakao.KakaoOption;
 import com.solapi.sdk.message.model.FailedMessage;
 import com.solapi.sdk.message.model.Message;
+import com.solapi.sdk.message.dto.request.MessageListRequest;
+import com.solapi.sdk.message.dto.response.MessageListResponse;
 import com.solapi.sdk.message.dto.response.MultipleDetailMessageSentResponse;
 import com.solapi.sdk.message.service.DefaultMessageService;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +59,29 @@ public class SolapiKakaoClient implements MessageClient {
             e.printStackTrace();
             // 예외 발생 시 에러 코드는 Exception 클래스 이름으로 대체하거나 상세 파싱 필요
             return MessageSendResult.fail(e.getMessage(), e.getClass().getSimpleName());
+        }
+    }
+
+    @Override
+    public String getMessageText(String messageId) {
+        try {
+            // Solapi SDK를 통해 메시지 조회
+            MessageListRequest request = new MessageListRequest();
+            request.setMessageId(messageId);
+            request.setLimit(1);
+
+            MessageListResponse response = messageService.getMessageList(request);
+
+            if (response != null && response.getMessageList() != null) {
+                var messages = response.getMessageList();
+                if (!messages.isEmpty()) {
+                    return messages.values().iterator().next().getText();
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
