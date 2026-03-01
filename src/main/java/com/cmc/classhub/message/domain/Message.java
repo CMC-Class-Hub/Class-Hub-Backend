@@ -58,6 +58,9 @@ public class Message {
 
     private LocalDateTime completedAt; // 완료(성공/실패) 일시
 
+    @Column(columnDefinition = "TEXT")
+    private String content; // 실제 발송된 메시지 내용
+
     @Builder
     private Message(DomainType domainType, Long rid, MessageTemplateType templateType,
             String receiverName, String receiverPhone, MessageStatus status, String providerMessageId,
@@ -143,5 +146,9 @@ public class Message {
         this.status = MessageStatus.FAILED;
         this.failReason = failReason;
         this.failCode = failCode;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }
