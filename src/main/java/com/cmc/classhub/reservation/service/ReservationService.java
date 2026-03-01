@@ -59,10 +59,12 @@ public class ReservationService {
                         throw new IllegalStateException("이미 확정된 예약이 있는 일정입니다.");
                 }
 
-                // 4. 중복 예약 확인 (취소된 예약은 제외)
-                if (reservationRepository.existsBySessionIdAndMemberAndStatusNot(session.getId(), member,
-                                ReservationStatus.CANCELLED)) {
-                        throw new IllegalStateException("이미 해당 일정에 예약하셨습니다.");
+                // 4-1. 기존 PENDING 예약이 있다면 취소 처리 (덮어쓰기 허용)
+                List<Reservation> pendingReservations = reservationRepository.findBySessionIdAndMemberAndStatus(
+                                session.getId(), member, ReservationStatus.PENDING);
+                for (Reservation pending : pendingReservations) {
+                        pending.cancel();
+                        session.cancel();
                 }
 
                 // 5. 세션 예약 처리 (정원 체크 포함)
