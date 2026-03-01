@@ -98,4 +98,12 @@ public class ReservationController {
                 sessionService.getUpcomingSessionsByClassId(classId));
     }
 
+    @Operation(summary = "출석 체크", description = "예약 코드로 출석 상태를 PRESENT로 변경합니다")
+    @PatchMapping("/{reservationCode}/attendance/present")
+    public ResponseEntity<Void> markPresent(
+            @Parameter(description = "예약 코드") @PathVariable String reservationCode) {
+        reservationService.markPresent(reservationCode);
+        return ResponseEntity.noContent().build();
+    }
+
 }
