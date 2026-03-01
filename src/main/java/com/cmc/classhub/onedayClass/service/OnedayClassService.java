@@ -22,6 +22,7 @@ public class OnedayClassService {
 
     private final OnedayClassRepository onedayClassRepository;
     private final ReservationRepository reservationRepository;
+
     // 1. 강사의 모든 클래스 조회 (삭제되지 않은 것만)
     public List<OnedayClassResponse> getClassesByInstructor(Long instructorId) {
         List<OnedayClass> classes = onedayClassRepository
@@ -102,7 +103,7 @@ public class OnedayClassService {
 
         // ✅ 각 세션의 예약 상태 확인
         List<Reservation> allReservations = reservationRepository.findAllBySessionIdIn(sessionIds);
-        
+
         // 예약이 하나도 없는 경우 → Hard Delete (DB에서 완전 삭제)
         if (allReservations.isEmpty()) {
             onedayClassRepository.delete(onedayClass);
@@ -116,7 +117,6 @@ public class OnedayClassService {
         if (hasActiveReservation) {
             throw new IllegalStateException("취소되지 않은 예약이 존재하여 클래스를 삭제할 수 없습니다.");
         }
-
 
         onedayClass.delete();
         onedayClass.getSessions().forEach(Session::delete);
@@ -150,15 +150,14 @@ public class OnedayClassService {
 
     @Transactional
     public void updateLinkShareStatus(
-        Long classId,
-        LinkShareStatusUpdateRequest status
-    ) {
-    OnedayClass onedayClass = onedayClassRepository.findById(classId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
+            Long classId,
+            LinkShareStatusUpdateRequest status) {
+        OnedayClass onedayClass = onedayClassRepository.findById(classId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스입니다."));
 
-    if (onedayClass.isDeleted()) {
-        throw new IllegalStateException("삭제된 클래스는 링크 공유 상태를 변경할 수 없습니다.");
-    }
+        if (onedayClass.isDeleted()) {
+            throw new IllegalStateException("삭제된 클래스는 링크 공유 상태를 변경할 수 없습니다.");
+        }
 
         onedayClass.updateLinkShareStatus(status.linkShareStatus());
     }
