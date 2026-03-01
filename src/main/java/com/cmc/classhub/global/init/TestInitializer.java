@@ -6,9 +6,11 @@ import com.cmc.classhub.instructor.repository.InstructorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+@Order(2)
 @Component
 //@Profile({"local", "dev"})
 @RequiredArgsConstructor

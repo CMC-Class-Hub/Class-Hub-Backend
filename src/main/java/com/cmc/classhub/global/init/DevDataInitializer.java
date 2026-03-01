@@ -1,6 +1,5 @@
 package com.cmc.classhub.global.init;
 
-import com.cmc.classhub.global.auth.domain.Role;
 import com.cmc.classhub.instructor.domain.Instructor;
 import com.cmc.classhub.instructor.repository.InstructorRepository;
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
@@ -14,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Slf4j
+@Order(3)
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
@@ -36,38 +37,19 @@ public class DevDataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // 이미 데이터가 있으면 스킵
-        if (instructorRepository.count() > 0) {
-            log.info("[DEV] 이미 데이터가 존재하여 초기화를 스킵합니다.");
-            return;
-        }
-
-        log.info("[DEV] 테스트 데이터 초기화 시작");
-
-        // 1. 테스트 강사 생성
-        Instructor instructor = createInstructor();
+        // 1. 테스트 강사 조회
+        Instructor testInstructor = instructorRepository.findByEmail("test@classhub.com")
+                .orElseThrow(() -> new IllegalStateException("TestInitializer가 먼저 test 계정을 생성해야 합니다."));
 
         // 2. 클래스 2개 생성 (각각 세션 포함)
-        OnedayClass class1 = createClass1(instructor.getId());
-        OnedayClass class2 = createClass2(instructor.getId());
+        OnedayClass class1 = createClass1(testInstructor.getId());
+        OnedayClass class2 = createClass2(testInstructor.getId());
 
         // 3. 수강생 및 예약 생성
         createReservationsForClass1(class1);
         createReservationsForClass2(class2);
 
         log.info("[DEV] 테스트 데이터 초기화 완료");
-    }
-
-    private Instructor createInstructor() {
-        Instructor instructor = Instructor.builder()
-                .name("테스트 강사")
-                .email("test@classhub.com")
-                .phoneNumber("01012345678")
-                .passwordHash(passwordEncoder.encode("test1234"))
-                .role(Role.USER)
-                .build();
-
-        return instructorRepository.save(instructor);
     }
 
     private OnedayClass createClass1(Long instructorId) {
