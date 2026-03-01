@@ -26,4 +26,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             Long rid,
             MessageTemplateType templateType,
             List<MessageStatus> statuses);
+
+    /**
+     * 발신자별 메시지 이력 조회
+     */
+    List<Message> findBySenderIdOrderByRequestedAtDesc(Long senderId);
 }

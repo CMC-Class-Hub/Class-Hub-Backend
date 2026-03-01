@@ -1,5 +1,6 @@
 package com.cmc.classhub.message.service;
 
+import com.cmc.classhub.message.client.MessageClient;
 import com.cmc.classhub.message.domain.Message;
 import com.cmc.classhub.message.dto.SolapiWebhookRequest;
 import com.cmc.classhub.message.repository.MessageRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageWebhookService {
 
     private final MessageRepository messageRepository;
+    private final MessageClient messageClient;
 
     /**
      * Webhook 수신하여 메시지 상태 업데이트
@@ -39,6 +41,16 @@ public class MessageWebhookService {
         if ("4000".equals(request.getStatusCode())) {
             // 수신 일시(dateReceived)를 완료 일시로 저장 (없으면 현재 시간)
             message.markAsSent(request.getDateReceived());
+
+            // 메시지 내용 조회 및 저장
+            try {
+                String content = messageClient.getMessageText(request.getMessageId());
+                if (content != null) {
+                    message.setContent(content);
+                }
+            } catch (Exception e) {
+                log.warn("메시지 내용 조회 실패: messageId={}", request.getMessageId(), e);
+            }
             return;
         }
 

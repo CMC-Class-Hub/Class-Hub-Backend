@@ -21,6 +21,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findBySessionIdAndMemberAndStatus(Long sessionId, Member member, ReservationStatus status);
 
+    // 취소되지 않은 예약 중복 체크
+    boolean existsBySessionIdAndMemberAndStatusNot(Long sessionId, Member member, ReservationStatus status);
+
     // ID 기반 쿼리도 제공 (호환성)
     @Query("SELECT r FROM Reservation r WHERE r.sessionId = :sessionId")
     List<Reservation> findAllBySessionId(@Param("sessionId") Long sessionId);
