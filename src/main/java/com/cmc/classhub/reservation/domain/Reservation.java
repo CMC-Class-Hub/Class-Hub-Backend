@@ -52,8 +52,8 @@ public class Reservation {
     private Reservation(Long sessionId, Member member) {
         this.sessionId = sessionId;
         this.member = member;
-        this.reservationCode = java.util.UUID.randomUUID().toString();
-        this.status = ReservationStatus.CONFIRMED;
+        this.reservationCode = java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        this.status = ReservationStatus.PENDING;
         this.attendanceStatus = AttendanceStatus.ABSENT;
         this.createdAt = LocalDateTime.now();
     }
@@ -64,6 +64,12 @@ public class Reservation {
                 .sessionId(sessionId)
                 .member(member)
                 .build();
+    }
+
+    // 예약 확정
+    public void confirm() {
+        this.status = ReservationStatus.CONFIRMED;
+        this.confirmedAt = LocalDateTime.now();
     }
 
     // 출석 체크

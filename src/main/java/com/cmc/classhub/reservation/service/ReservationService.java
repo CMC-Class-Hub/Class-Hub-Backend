@@ -7,6 +7,7 @@ import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
 import com.cmc.classhub.reservation.domain.ReservationStatus;
+import com.cmc.classhub.reservation.dto.ReservationCreateResponse;
 import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
@@ -89,7 +90,7 @@ public class ReservationService {
                 // 2. 예약 확정 알림톡 발송
                 try {
                         messageService.sendAuto(MessageTemplateType.AUTO_APPLY_CONFIRMED,
-                                        savedReservation.getId());
+                                        reservation.getId());
                 } catch (Exception e) {
                         // 알림톡 발송 실패가 예약 프로세스를 방해하면 안 됨
                         e.printStackTrace();
