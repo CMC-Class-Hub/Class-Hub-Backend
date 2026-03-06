@@ -73,7 +73,23 @@ public class ReservationService {
                 // 6. 예약 생성 (상태: PENDING)
                 Reservation reservation = Reservation.apply(session.getId(), member);
 
+                // 7. 0원 이하면 결제 없이 즉시 확정
+                if (session.getPrice() <= 0) {
+                        reservation.confirm();
+                }
+
                 Reservation savedReservation = reservationRepository.save(reservation);
+
+                // 8. 0원 예약 확정 시 알림톡 발송
+                if (session.getPrice() <= 0) {
+                        try {
+                                messageService.sendAuto(MessageTemplateType.AUTO_APPLY_CONFIRMED,
+                                                savedReservation.getId());
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        }
+                }
+
                 return ReservationCreateResponse.builder()
                                 .reservationCode(savedReservation.getReservationCode())
                                 .build();
