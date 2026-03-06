@@ -36,6 +36,10 @@ dependencies {
 	// mysql - 운영용
 	implementation 'mysql:mysql-connector-java:8.0.33'
 
+	// flyway - DB 마이그레이션
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-mysql'
+
 	// spring security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
