@@ -8,6 +8,7 @@ import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
 import com.cmc.classhub.reservation.service.ReservationService;
+import com.cmc.classhub.reservation.dto.ReservationCreateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,10 +36,10 @@ public class ReservationController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @PostMapping
-    public ResponseEntity<String> reserve(
+    public ResponseEntity<ReservationCreateResponse> reserve(
             @Parameter(description = "클래스 ID") @RequestParam Long onedayClassId,
             @RequestBody @Valid ReservationRequest request) {
-        String reservationCode = reservationService.createReservation(request, onedayClassId);
+        ReservationCreateResponse reservationCode = reservationService.createReservation(request, onedayClassId);
         return ResponseEntity.ok(reservationCode);
     }
 
@@ -79,7 +80,7 @@ public class ReservationController {
     @GetMapping("/code/{classCode}")
     public ResponseEntity<OnedayClassResponse> getClassByCode(
             @Parameter(description = "클래스 코드") @PathVariable String classCode) {
-        return ResponseEntity.ok(onedayClassService.getClassByCode(classCode));
+        return ResponseEntity.ok(reservationService.getClassByCode(classCode));
     }
 
     @Operation(summary = "클래스 코드로 예약 조회", description = "클래스 코드로 해당 클래스의 모든 예약을 조회합니다")
@@ -96,6 +97,14 @@ public class ReservationController {
             @Parameter(description = "클래스 ID") @PathVariable Long classId) {
         return ResponseEntity.ok(
                 sessionService.getUpcomingSessionsByClassId(classId));
+    }
+
+    @Operation(summary = "출석 체크", description = "예약 코드로 출석 상태를 PRESENT로 변경합니다")
+    @PatchMapping("/{reservationCode}/attendance/present")
+    public ResponseEntity<Void> markPresent(
+            @Parameter(description = "예약 코드") @PathVariable String reservationCode) {
+        reservationService.markPresent(reservationCode);
+        return ResponseEntity.noContent().build();
     }
 
 }

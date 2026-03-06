@@ -50,6 +50,22 @@ public class MessageTemplateService {
                 .collect(Collectors.toList());
     }
 
+    // 수동 발송용 템플릿만 조회 (MANUAL_ 접두사)
+    public List<MessageTemplateMetadata> getManualTemplates() {
+        return Arrays.stream(MessageTemplateType.values())
+                .filter(type -> type.name().startsWith("MANUAL_"))
+                .map(MessageTemplateMetadata::from)
+                .collect(Collectors.toList());
+    }
+
+    // 자동 발송용 템플릿만 조회 (AUTO_ 접두사)
+    public List<MessageTemplateMetadata> getAutoTemplates() {
+        return Arrays.stream(MessageTemplateType.values())
+                .filter(type -> type.name().startsWith("AUTO_"))
+                .map(MessageTemplateMetadata::from)
+                .collect(Collectors.toList());
+    }
+
     // 특정 템플릿 조회 (타이틀로 조회)
     public MessageTemplateResponse getTemplateByTitle(String title) {
         MessageTemplateType type = Arrays.stream(MessageTemplateType.values())

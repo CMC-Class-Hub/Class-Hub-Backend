@@ -74,6 +74,13 @@ public class OnedayClassController {
         return ResponseEntity.ok(sessionService.getSessionsByClassId(classId));
     }
 
+    @Operation(summary = "클래스의 다가오는 세션 목록 조회", description = "특정 클래스의 오늘 이후 세션만 조회합니다")
+    @GetMapping("/{classId}/sessions/upcoming")
+    public ResponseEntity<List<SessionResponse>> getUpcomingSessions(
+            @Parameter(description = "클래스 ID") @PathVariable Long classId) {
+        return ResponseEntity.ok(sessionService.getUpcomingSessionsByClassId(classId));
+    }
+
     @Operation(summary = "링크 공유 상태 변경", description = "클래스의 링크 공유 활성화/비활성화 상태를 변경합니다")
     @PatchMapping("/{classId}/link-share-status")
     public ResponseEntity<OnedayClassResponse> updateLinkShareStatus(

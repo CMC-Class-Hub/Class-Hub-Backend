@@ -32,6 +32,10 @@ public class Reservation {
     @Column(nullable = false)
     private ReservationStatus status; // CONFIRMED, CANCELLED
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AttendanceStatus attendanceStatus;
+
     private LocalDateTime confirmedAt; // 확정 일시
     private LocalDateTime cancelledAt; // 취소 일시
 
@@ -48,8 +52,9 @@ public class Reservation {
     private Reservation(Long sessionId, Member member) {
         this.sessionId = sessionId;
         this.member = member;
-        this.reservationCode = java.util.UUID.randomUUID().toString();
-        this.status = ReservationStatus.CONFIRMED;
+        this.reservationCode = java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        this.status = ReservationStatus.PENDING;
+        this.attendanceStatus = AttendanceStatus.ABSENT;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -59,6 +64,17 @@ public class Reservation {
                 .sessionId(sessionId)
                 .member(member)
                 .build();
+    }
+
+    // 예약 확정
+    public void confirm() {
+        this.status = ReservationStatus.CONFIRMED;
+        this.confirmedAt = LocalDateTime.now();
+    }
+
+    // 출석 체크
+    public void markPresent() {
+        this.attendanceStatus = AttendanceStatus.PRESENT;
     }
 
     // 취소

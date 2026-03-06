@@ -31,7 +31,7 @@ public class ReminderD1Sender extends ReservationSender {
 
     @Override
     public MessageTemplateType getSupportedType() {
-        return MessageTemplateType.REMINDER_D1;
+        return MessageTemplateType.AUTO_REMINDER_D1;
     }
 
     @Override

@@ -35,11 +35,16 @@ public class Message {
     private MessageTemplateType templateType;
 
     @Column(nullable = false)
-    private String receiver;
+    private String receiverName;
+
+    @Column(nullable = false)
+    private String receiverPhone;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MessageStatus status;
+
+    private Long senderId; // 발신자 ID (강사 ID, 자동 발송이면 null)
 
     private String providerMessageId; // Solapi Group ID or Message ID
 
@@ -53,47 +58,68 @@ public class Message {
 
     private LocalDateTime completedAt; // 완료(성공/실패) 일시
 
+    @Column(columnDefinition = "TEXT")
+    private String content; // 실제 발송된 메시지 내용
+
     @Builder
     private Message(DomainType domainType, Long rid, MessageTemplateType templateType,
-            String receiver, MessageStatus status, String providerMessageId,
-            String failReason, String failCode) {
+            String receiverName, String receiverPhone, MessageStatus status, String providerMessageId,
+            String failReason, String failCode, Long senderId) {
         this.domainType = domainType;
         this.rid = rid;
         this.templateType = templateType;
-        this.receiver = receiver;
+        this.receiverName = receiverName;
+        this.receiverPhone = receiverPhone;
         this.status = status;
         this.providerMessageId = providerMessageId;
         this.failReason = failReason;
         this.failCode = failCode;
+        this.senderId = senderId;
         this.requestedAt = LocalDateTime.now();
     }
 
-    // 발송 요청 (SENDING)
+    // 발송 요청 (SENDING) - 자동 발송용
     public static Message sending(DomainType domainType, Long rid, MessageTemplateType templateType,
-            String receiver, String providerMessageId) {
+            String receiverName, String receiverPhone, String providerMessageId) {
+        return sending(domainType, rid, templateType, receiverName, receiverPhone, providerMessageId, null);
+    }
+
+    // 발송 요청 (SENDING) - 수동 발송용 (senderId 포함)
+    public static Message sending(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiverName, String receiverPhone, String providerMessageId, Long senderId) {
         return Message.builder()
                 .domainType(domainType)
                 .rid(rid)
                 .templateType(templateType)
-                .receiver(receiver)
+                .receiverName(receiverName)
+                .receiverPhone(receiverPhone)
                 .status(MessageStatus.SENDING)
                 .providerMessageId(providerMessageId)
+                .senderId(senderId)
                 .build();
     }
 
-    // 발송 실패 (즉시 실패)
+    // 발송 실패 (즉시 실패) - 자동 발송용
     public static Message fail(DomainType domainType, Long rid, MessageTemplateType templateType,
-            String receiver, String failReason, String failCode) {
+            String receiverName, String receiverPhone, String failReason, String failCode) {
+        return fail(domainType, rid, templateType, receiverName, receiverPhone, failReason, failCode, null);
+    }
+
+    // 발송 실패 (즉시 실패) - 수동 발송용 (senderId 포함)
+    public static Message fail(DomainType domainType, Long rid, MessageTemplateType templateType,
+            String receiverName, String receiverPhone, String failReason, String failCode, Long senderId) {
         Message message = Message.builder()
                 .domainType(domainType)
                 .rid(rid)
                 .templateType(templateType)
-                .receiver(receiver)
+                .receiverName(receiverName)
+                .receiverPhone(receiverPhone)
                 .status(MessageStatus.FAILED)
                 .failReason(failReason)
                 .failCode(failCode)
+                .senderId(senderId)
                 .build();
-        message.completedAt = LocalDateTime.now(); // 즉시 완료 처리
+        message.completedAt = LocalDateTime.now();
         return message;
     }
 
@@ -120,5 +146,9 @@ public class Message {
         this.status = MessageStatus.FAILED;
         this.failReason = failReason;
         this.failCode = failCode;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

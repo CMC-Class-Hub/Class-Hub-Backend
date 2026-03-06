@@ -1,16 +1,25 @@
 package com.cmc.classhub.reservation.service;
 
+import com.cmc.classhub.message.domain.MessageTemplateType;
 import com.cmc.classhub.onedayClass.domain.OnedayClass;
 import com.cmc.classhub.onedayClass.domain.Session;
 import com.cmc.classhub.onedayClass.repository.OnedayClassRepository;
 import com.cmc.classhub.reservation.domain.Member;
 import com.cmc.classhub.reservation.domain.Reservation;
 import com.cmc.classhub.reservation.domain.ReservationStatus;
+import com.cmc.classhub.reservation.dto.ReservationCreateResponse;
 import com.cmc.classhub.reservation.dto.ReservationDetailResponse;
 import com.cmc.classhub.reservation.dto.ReservationRequest;
 import com.cmc.classhub.reservation.dto.ReservationResponse;
 import com.cmc.classhub.reservation.repository.MemberRepository;
 import com.cmc.classhub.reservation.repository.ReservationRepository;
+import com.cmc.classhub.payment.repository.PaymentRepository;
+import com.cmc.classhub.payment.domain.PaymentStatus;
+import com.cmc.classhub.onedayClass.repository.SessionRepository;
+import com.cmc.classhub.onedayClass.dto.OnedayClassResponse;
+import com.cmc.classhub.instructor.repository.InstructorRepository;
+import com.cmc.classhub.instructor.domain.Instructor;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -30,26 +39,32 @@ public class ReservationService {
         private final MemberRepository memberRepository;
         private final OnedayClassRepository onedayClassRepository;
         private final com.cmc.classhub.message.service.MessageService messageService;
+        private final PaymentRepository paymentRepository;
+        private final SessionRepository sessionRepository;
+        private final InstructorRepository instructorRepository;
 
-        public String createReservation(ReservationRequest request, Long onedayClassId) {
+        public ReservationCreateResponse createReservation(ReservationRequest request, Long onedayClassId) {
                 // 1. 회원 조회 또는 생성 (게스트)
                 Member member = memberRepository
                                 .findByNameAndPhone(request.getApplicantName(), request.getPhoneNumber())
                                 .orElseGet(() -> createGuestMember(request));
 
-                // 2. 클래스 조회
-                OnedayClass onedayClass = onedayClassRepository.findById(onedayClassId)
-                                .orElseThrow();
+                // 3. 세션 조회 (비관적 락 적용)
+                Session session = sessionRepository.findByIdWithLock(request.getSessionId())
+                                .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
 
-                // 3. 세션 조회 (클래스의 세션 목록에서)
-                Session session = onedayClass.getSessions().stream()
-                                .filter(s -> s.getId().equals(request.getSessionId()))
-                                .findFirst()
-                                .orElseThrow();
+                // 4. 중복 예약 확인 (확정된 예약이 있는 경우에만 차단)
+                if (reservationRepository.existsBySessionIdAndMemberAndStatus(session.getId(), member,
+                                ReservationStatus.CONFIRMED)) {
+                        throw new IllegalStateException("이미 확정된 예약이 있는 일정입니다.");
+                }
 
-                // 4. 중복 예약 확인 (취소된 예약은 제외)
-                if (reservationRepository.existsBySessionIdAndMemberAndStatusNot(session.getId(), member, ReservationStatus.CANCELLED)) {
-                        throw new IllegalStateException("이미 해당 일정에 예약하셨습니다.");
+                // 4-1. 기존 PENDING 예약이 있다면 취소 처리 (덮어쓰기 허용)
+                List<Reservation> pendingReservations = reservationRepository.findBySessionIdAndMemberAndStatus(
+                                session.getId(), member, ReservationStatus.PENDING);
+                for (Reservation pending : pendingReservations) {
+                        pending.cancel();
+                        session.cancel();
                 }
 
                 // 5. 세션 예약 처리 (정원 체크 포함)
@@ -59,24 +74,81 @@ public class ReservationService {
                 Reservation reservation = Reservation.apply(session.getId(), member);
 
                 Reservation savedReservation = reservationRepository.save(reservation);
-                String reservationCode = savedReservation.getReservationCode();
+                return ReservationCreateResponse.builder()
+                                .reservationCode(savedReservation.getReservationCode())
+                                .build();
+        }
 
-                // 7. 예약 확정 알림톡 발송
+        /**
+         * 예약 확정 처리 (결제 성공 시 호출)
+         */
+        public void completeReservation(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
+                                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+                // 1. 상태를 CONFIRMED로 변경
+                reservation.confirm();
+
+                // 2. 예약 확정 알림톡 발송
                 try {
-                        messageService.send(com.cmc.classhub.message.domain.MessageTemplateType.APPLY_CONFIRMED,
-                                        savedReservation.getId());
+                        messageService.sendAuto(MessageTemplateType.AUTO_APPLY_CONFIRMED,
+                                        reservation.getId());
                 } catch (Exception e) {
                         // 알림톡 발송 실패가 예약 프로세스를 방해하면 안 됨
                         e.printStackTrace();
                 }
+        }
 
-                return reservationCode;
+        /**
+         * 예약 실패 처리 (결제 실패 시 호출)
+         */
+        public void failReservation(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
+                                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+                // 이미 취소된 경우 무시
+                if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+                        return;
+                }
+
+                // 1. 상태를 CANCELLED로 변경
+                reservation.cancel();
+
+                // 2. 세션 인원 원복 (비관적 락 적용)
+                Session session = sessionRepository.findByIdWithLock(reservation.getSessionId())
+                                .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
+
+                session.cancel();
+        }
+
+        /**
+         * 15분 동안 결제가 완료되지 않은 PENDING 예약을 자동으로 취소 처리
+         */
+        @Scheduled(fixedRate = 60000) // 1분마다 실행
+        @Transactional
+        public void expirePendingReservations() {
+                LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(15);
+                List<Reservation> expiredReservations = reservationRepository.findByStatusAndCreatedAtBefore(
+                                ReservationStatus.PENDING, expiryTime);
+
+                for (Reservation reservation : expiredReservations) {
+                        // 1. 예약 취소 및 인원 원복 처리
+                        failReservation(reservation.getReservationCode());
+
+                        // 2. 연관된 결제 정보가 있다면 실패 처리
+                        paymentRepository.findByReservationId(reservation.getId())
+                                        .ifPresent(payment -> {
+                                                if (payment.getStatus() == PaymentStatus.PENDING) {
+                                                        payment.fail("TIMEOUT", "결제 시간 초과(15분)");
+                                                }
+                                        });
+                }
         }
 
         @Transactional(readOnly = true)
         public List<ReservationResponse> getReservationsBySession(Long sessionId) {
-                // 1. 해당 세션의 모든 예약 조회
-                List<Reservation> reservations = reservationRepository.findAllBySessionId(sessionId);
+                // 1. DB 쿼리를 통해 이름+전화번호 기준 최신 예약만 조회
+                List<Reservation> reservations = reservationRepository.findLatestReservationsBySession(sessionId);
 
                 // 2. 예약 정보 + 회원 정보 매핑하여 반환
                 return reservations.stream()
@@ -92,6 +164,7 @@ public class ReservationService {
                                                         .studentId(member.getId())
                                                         .appliedAt(reservation.getCreatedAt())
                                                         .reservationStatus(reservation.getStatus().name())
+                                                        .attendanceStatus(reservation.getAttendanceStatus().name())
                                                         .sentD3Notification(reservation.isSentD3Notification())
                                                         .sentD1Notification(reservation.isSentD1Notification())
                                                         .build();
@@ -115,10 +188,15 @@ public class ReservationService {
                                 .findFirst()
                                 .orElseThrow(() -> new IllegalArgumentException("세션 정보를 찾을 수 없습니다."));
 
+                String instructorProfileUrl = instructorRepository.findById(onedayClass.getInstructorId())
+                                .map(Instructor::getProfileUrl)
+                                .orElse(null);
+
                 return ReservationDetailResponse.builder()
                                 .reservationId(reservation.getId())
                                 .classTitle(onedayClass.getTitle())
                                 .classLocation(onedayClass.getLocation())
+                                .instructorProfileUrl(instructorProfileUrl)
                                 .classCode(onedayClass.getClassCode())
                                 .date(session.getDate())
                                 .startTime(session.getStartTime())
@@ -129,6 +207,7 @@ public class ReservationService {
                                 .currentNum(session.getCurrentNum())
                                 .sessionStatus(session.getStatus().name())
                                 .reservationStatus(reservation.getStatus().name())
+                                .attendanceStatus(reservation.getAttendanceStatus().name())
                                 .build();
         }
 
@@ -143,10 +222,7 @@ public class ReservationService {
                         return Collections.emptyList();
                 }
 
-                List<Reservation> myReservations = reservationRepository.findAll().stream()
-                                .filter(r -> r.getMember().getId().equals(member.getId()))
-                                .sorted((a, b) -> b.getId().compareTo(a.getId())) // 최신순 정렬
-                                .toList();
+                List<Reservation> myReservations = reservationRepository.findByMemberIdOrderByIdDesc(member.getId());
 
                 // 3. 상세 정보로 변환
                 return myReservations.stream().map(reservation -> {
@@ -159,10 +235,16 @@ public class ReservationService {
                                                 .findFirst()
                                                 .orElseThrow();
 
+                                String instructorProfileUrl = instructorRepository
+                                                .findById(onedayClass.getInstructorId())
+                                                .map(Instructor::getProfileUrl)
+                                                .orElse(null);
+
                                 return ReservationDetailResponse.builder()
                                                 .reservationId(reservation.getId())
                                                 .classTitle(onedayClass.getTitle())
                                                 .classLocation(onedayClass.getLocation())
+                                                .instructorProfileUrl(instructorProfileUrl)
                                                 .date(session.getDate())
                                                 .startTime(session.getStartTime())
                                                 .endTime(session.getEndTime())
@@ -170,6 +252,7 @@ public class ReservationService {
                                                 .phoneNumber(member.getPhone())
                                                 .sessionStatus(session.getStatus().name())
                                                 .reservationStatus(reservation.getStatus().name())
+                                                .attendanceStatus(reservation.getAttendanceStatus().name())
                                                 .build();
                         } catch (Exception e) {
                                 return null;
@@ -193,11 +276,12 @@ public class ReservationService {
                                 .map(Session::getId)
                                 .collect(Collectors.toList());
 
-                // 4. 모든 세션의 예약 목록 조회
-                List<Reservation> reservations = reservationRepository.findAll().stream()
-                                .filter(r -> sessionIds.contains(r.getSessionId()))
-                                .sorted((a, b) -> b.getId().compareTo(a.getId())) // 최신순 정렬
-                                .toList();
+                // 4. 모든 세션의 예약 목록 조회 (최신순)
+                List<Reservation> reservations = reservationRepository.findBySessionIdInOrderByIdDesc(sessionIds);
+
+                String instructorProfileUrl = instructorRepository.findById(onedayClass.getInstructorId())
+                                .map(Instructor::getProfileUrl)
+                                .orElse(null);
 
                 // 5. 상세 정보로 변환
                 return reservations.stream().map(reservation -> {
@@ -213,6 +297,7 @@ public class ReservationService {
                                                 .reservationId(reservation.getId())
                                                 .classTitle(onedayClass.getTitle())
                                                 .classLocation(onedayClass.getLocation())
+                                                .instructorProfileUrl(instructorProfileUrl)
                                                 .classCode(onedayClass.getClassCode())
                                                 .date(session.getDate())
                                                 .startTime(session.getStartTime())
@@ -223,6 +308,7 @@ public class ReservationService {
                                                 .currentNum(session.getCurrentNum())
                                                 .sessionStatus(session.getStatus().name())
                                                 .reservationStatus(reservation.getStatus().name())
+                                                .attendanceStatus(reservation.getAttendanceStatus().name())
                                                 .build();
                         } catch (Exception e) {
                                 return null;
@@ -258,6 +344,12 @@ public class ReservationService {
                 // Note: 예약 엔티티는 삭제하지 않고 이력 관리
         }
 
+        public void markPresent(String reservationCode) {
+                Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
+                                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+                reservation.markPresent();
+        }
+
         private Member createGuestMember(ReservationRequest request) {
                 Member guestMember = Member.builder()
                                 .name(request.getApplicantName())
@@ -266,4 +358,19 @@ public class ReservationService {
                 return memberRepository.save(guestMember);
         }
 
+        @Transactional(readOnly = true)
+        public OnedayClassResponse getClassByCode(String classCode) {
+                OnedayClass onedayClass = onedayClassRepository.findByClassCode(classCode)
+                                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클래스 코드입니다."));
+
+                if (onedayClass.isDeleted()) {
+                        throw new IllegalArgumentException("삭제된 클래스입니다.");
+                }
+
+                String profileUrl = instructorRepository.findById(onedayClass.getInstructorId())
+                                .map(Instructor::getProfileUrl)
+                                .orElse(null);
+
+                return OnedayClassResponse.from(onedayClass, profileUrl);
+        }
 }

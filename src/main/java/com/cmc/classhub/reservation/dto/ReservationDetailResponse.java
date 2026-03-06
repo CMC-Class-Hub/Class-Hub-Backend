@@ -23,6 +23,9 @@ public class ReservationDetailResponse {
     @Schema(description = "클래스 장소", example = "서울시 강남구 테헤란로 123")
     private String classLocation;
 
+    @Schema(description = "강사 프로필 URL", example = "https://example.com/profile.jpg")
+    private String instructorProfileUrl;
+
     @Schema(description = "클래스 코드", example = "ABC123")
     private String classCode;
 
@@ -52,4 +55,7 @@ public class ReservationDetailResponse {
 
     @Schema(description = "예약 상태", example = "CONFIRMED")
     private String reservationStatus;
+
+    @Schema(description = "출석 상태", example = "READY")
+    private String attendanceStatus;
 }
