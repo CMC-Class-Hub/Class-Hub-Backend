@@ -40,3 +40,8 @@ nicepay:
 
 frontend:
   url: http://localhost:3001
+
+
+sentry:
+  dsn: ""
+  environment: dev
