@@ -59,3 +59,8 @@ nicepay:
   client-id: ${NICEPAY_CLIENT_ID}
   secret-key: ${NICEPAY_SECRET_KEY}
   api-url: ${NICEPAY_API_URL}
+
+sentry:
+  dsn: ${SENTRY_DSN}
+  environment: production
+  traces-sample-rate: 1.0 # 필요에 따라 샘플링 비율 조정 (1.0 = 100%)

@@ -44,10 +44,7 @@ public class PaymentController {
    * 결제 승인 처리 (Nicepay에서 리다이렉트 후 호출)
    * Nicepay JS SDK가 Nicepay 도메인에서 직접 호출하므로 모든 Origin 허용
    */
-  @CrossOrigin(origins = {
-      "https://pay.nicepay.co.kr",
-      "https://sandbox-api.nicepay.co.kr"
-  })
+  @CrossOrigin(origins = "*")
   @RequestMapping("/clientAuth")
   public ResponseEntity<Void> approvePayment(HttpServletRequest request) {
     System.out.println("=== Nicepay Callback Recieved ===");
