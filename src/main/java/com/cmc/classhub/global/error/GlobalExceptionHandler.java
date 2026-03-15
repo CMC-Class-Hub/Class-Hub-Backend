@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.cmc.classhub.global.error.dto.ErrorResponse;
 import com.cmc.classhub.global.error.exception.InvalidTokenException;
 import com.cmc.classhub.global.auth.jwt.JwtCookieManager;
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,6 +55,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.error("Internal Server Error", e);
+        Sentry.captureException(e); // Sentry로 에러 전송
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다."));
